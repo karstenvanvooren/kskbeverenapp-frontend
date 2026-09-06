@@ -10,6 +10,7 @@ import {
     View,
 } from "react-native";
 
+import ScreenHeader from "../components/ScreenHeader";
 import { COLORS, FONTS, RADII, SPACING } from "../constants/theme";
 import { getNews } from "../services/api";
 
@@ -53,60 +54,64 @@ export default function NewsScreen({ navigation }) {
     }, [])
   );
 
-  if (loading) {
-    return (
-      <View style={styles.center}>
-        <ActivityIndicator size="large" color={COLORS.primary} />
-      </View>
-    );
-  }
-
-  if (error) {
-    return (
-      <View style={styles.center}>
-        <Text style={styles.errorText}>{error}</Text>
-      </View>
-    );
-  }
-
   return (
-    <FlatList
-      contentContainerStyle={styles.list}
-      data={articles}
-      keyExtractor={(item) => item._id}
-      renderItem={({ item }) => (
-        <Pressable
-          style={styles.card}
-          onPress={() =>
-            navigation.navigate("NewsDetail", { newsId: item._id })
-          }
-        >
-          {item.image ? (
-            <Image source={{ uri: item.image }} style={styles.image} />
-          ) : null}
+    <View style={styles.screen}>
+      <ScreenHeader />
 
-          <View style={styles.cardBody}>
-            <Text style={styles.category}>{item.category}</Text>
-            <Text style={styles.title}>{item.title}</Text>
-            <Text style={styles.summary} numberOfLines={2}>
-              {item.summary}
-            </Text>
-            <Text style={styles.meta}>
-              {item.author} · {formatDate(item.publishedAt)}
-            </Text>
-          </View>
-        </Pressable>
-      )}
-      ListEmptyComponent={
+      {loading ? (
         <View style={styles.center}>
-          <Text style={styles.errorText}>Geen nieuwsartikels gevonden.</Text>
+          <ActivityIndicator size="large" color={COLORS.primary} />
         </View>
-      }
-    />
+      ) : error ? (
+        <View style={styles.center}>
+          <Text style={styles.errorText}>{error}</Text>
+        </View>
+      ) : (
+        <FlatList
+          contentContainerStyle={styles.list}
+          data={articles}
+          keyExtractor={(item) => item._id}
+          renderItem={({ item }) => (
+            <Pressable
+              style={styles.card}
+              onPress={() =>
+                navigation.navigate("NewsDetail", { newsId: item._id })
+              }
+            >
+              {item.image ? (
+                <Image source={{ uri: item.image }} style={styles.image} />
+              ) : null}
+
+              <View style={styles.cardBody}>
+                <Text style={styles.category}>{item.category}</Text>
+                <Text style={styles.title}>{item.title}</Text>
+                <Text style={styles.summary} numberOfLines={2}>
+                  {item.summary}
+                </Text>
+                <Text style={styles.meta}>
+                  {item.author} · {formatDate(item.publishedAt)}
+                </Text>
+              </View>
+            </Pressable>
+          )}
+          ListEmptyComponent={
+            <View style={styles.center}>
+              <Text style={styles.errorText}>
+                Geen nieuwsartikels gevonden.
+              </Text>
+            </View>
+          }
+        />
+      )}
+    </View>
   );
 }
 
 const styles = StyleSheet.create({
+  screen: {
+    flex: 1,
+    backgroundColor: COLORS.background,
+  },
   center: {
     flex: 1,
     justifyContent: "center",

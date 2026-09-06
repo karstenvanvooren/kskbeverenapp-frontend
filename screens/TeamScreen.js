@@ -10,6 +10,7 @@ import {
     View,
 } from "react-native";
 
+import ScreenHeader from "../components/ScreenHeader";
 import { COLORS, FONTS, SPACING } from "../constants/theme";
 import { getPlayers } from "../services/api";
 
@@ -63,67 +64,69 @@ export default function TeamScreen({ navigation }) {
     }, [])
   );
 
-  if (loading) {
-    return (
-      <View style={styles.center}>
-        <ActivityIndicator size="large" color={COLORS.primary} />
-      </View>
-    );
-  }
-
-  if (error) {
-    return (
-      <View style={styles.center}>
-        <Text style={styles.errorText}>{error}</Text>
-      </View>
-    );
-  }
-
   return (
-    <SectionList
-      contentContainerStyle={styles.list}
-      sections={sections}
-      keyExtractor={(item) => item._id}
-      renderSectionHeader={({ section }) => (
-        <Text style={styles.sectionHeader}>{section.title}</Text>
-      )}
-      renderItem={({ item }) => (
-        <Pressable
-          style={styles.row}
-          onPress={() =>
-            navigation.navigate("PlayerDetail", { playerId: item._id })
-          }
-        >
-          {item.image ? (
-            <Image source={{ uri: item.image }} style={styles.avatar} />
-          ) : (
-            <View style={styles.avatarFallback}>
-              <Text style={styles.avatarFallbackText}>
-                {item.number ?? "?"}
-              </Text>
-            </View>
-          )}
+    <View style={styles.screen}>
+      <ScreenHeader />
 
-          <View style={styles.rowText}>
-            <Text style={styles.playerName}>
-              {item.firstName} {item.lastName}
-            </Text>
-            {item.number ? (
-              <Text style={styles.playerNumber}>#{item.number}</Text>
-            ) : null}
-          </View>
-        </Pressable>
-      )}
-      ListEmptyComponent={
+      {loading ? (
         <View style={styles.center}>
-          <Text style={styles.errorText}>Geen spelers gevonden.</Text>
+          <ActivityIndicator size="large" color={COLORS.primary} />
         </View>
-      }
-    />
+      ) : error ? (
+        <View style={styles.center}>
+          <Text style={styles.errorText}>{error}</Text>
+        </View>
+      ) : (
+        <SectionList
+          contentContainerStyle={styles.list}
+          sections={sections}
+          keyExtractor={(item) => item._id}
+          renderSectionHeader={({ section }) => (
+            <Text style={styles.sectionHeader}>{section.title}</Text>
+          )}
+          renderItem={({ item }) => (
+            <Pressable
+              style={styles.row}
+              onPress={() =>
+                navigation.navigate("PlayerDetail", { playerId: item._id })
+              }
+            >
+              {item.image ? (
+                <Image source={{ uri: item.image }} style={styles.avatar} />
+              ) : (
+                <View style={styles.avatarFallback}>
+                  <Text style={styles.avatarFallbackText}>
+                    {item.number ?? "?"}
+                  </Text>
+                </View>
+              )}
+
+              <View style={styles.rowText}>
+                <Text style={styles.playerName}>
+                  {item.firstName} {item.lastName}
+                </Text>
+                {item.number ? (
+                  <Text style={styles.playerNumber}>#{item.number}</Text>
+                ) : null}
+              </View>
+            </Pressable>
+          )}
+          ListEmptyComponent={
+            <View style={styles.center}>
+              <Text style={styles.errorText}>Geen spelers gevonden.</Text>
+            </View>
+          }
+        />
+      )}
+    </View>
   );
 }
 
 const styles = StyleSheet.create({
+  screen: {
+    flex: 1,
+    backgroundColor: COLORS.background,
+  },
   center: {
     flex: 1,
     justifyContent: "center",

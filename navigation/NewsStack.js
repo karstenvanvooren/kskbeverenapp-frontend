@@ -17,12 +17,12 @@ export default function NewsStack() {
       <Stack.Screen
         name="NewsMain"
         component={NewsScreen}
-        options={{ title: "Nieuws" }}
+        options={{ headerShown: false }}
       />
       <Stack.Screen
         name="NewsDetail"
         component={NewsDetailScreen}
-        options={{ title: "Artikel" }}
+        options={{ headerShown: false, presentation: "modal" }}
       />
     </Stack.Navigator>
   );

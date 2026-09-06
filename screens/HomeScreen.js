@@ -13,6 +13,7 @@ import {
 } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
+import MatchListCard from "../components/MatchListCard";
 import { COLORS, FONTS, RADII, SPACING } from "../constants/theme";
 import { getMatches, getNews, getPlayers } from "../services/api";
 
@@ -22,13 +23,6 @@ const leeuwHeader = require("../assets/images/leeuw_header.png");
 // TODO: no standings/ranking endpoint exists yet on the backend — this is a
 // placeholder until there's a real source for league position.
 const LEAGUE_POSITION = "3de";
-
-function formatShortDate(value) {
-  return new Date(value).toLocaleDateString("nl-BE", {
-    day: "numeric",
-    month: "short",
-  });
-}
 
 function formatDayTime(dateValue, time) {
   const day = new Date(dateValue).toLocaleDateString("nl-BE", {
@@ -187,38 +181,13 @@ export default function HomeScreen({ navigation }) {
         <Text style={styles.emptyText}>Geen komende wedstrijden.</Text>
       ) : (
         upcoming.slice(0, 3).map((match) => (
-          <Pressable
+          <MatchListCard
             key={match._id}
-            style={styles.upcomingCard}
+            match={match}
             onPress={() =>
               navigation.navigate("MatchDetail", { matchId: match._id })
             }
-          >
-            <View style={styles.upcomingCardTop}>
-              <Text style={styles.upcomingCardDate}>
-                {formatShortDate(match.date)} • {match.time}
-              </Text>
-              <View style={styles.homeTag}>
-                <Text style={styles.homeTagText}>
-                  {match.home ? "Thuis" : "Uit"}
-                </Text>
-              </View>
-            </View>
-
-            <View style={styles.upcomingCardTeams}>
-              <View style={styles.teamChipSmall}>
-                <Text style={styles.teamChipSmallText}>
-                  {match.home ? "KSK" : initials(match.opponent)}
-                </Text>
-              </View>
-              <Text style={styles.vsSmall}>vs</Text>
-              <View style={styles.teamChipSmall}>
-                <Text style={styles.teamChipSmallText}>
-                  {match.home ? initials(match.opponent) : "KSK"}
-                </Text>
-              </View>
-            </View>
-          </Pressable>
+          />
         ))
       )}
 
@@ -429,61 +398,6 @@ const styles = StyleSheet.create({
     fontSize: 16,
     color: COLORS.textMuted,
     paddingHorizontal: SPACING.xl,
-  },
-  upcomingCard: {
-    backgroundColor: COLORS.background,
-    borderRadius: RADII.md,
-    borderWidth: 1,
-    borderColor: COLORS.border,
-    padding: SPACING.md,
-    marginHorizontal: SPACING.xl,
-    marginBottom: SPACING.sm,
-  },
-  upcomingCardTop: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    alignItems: "center",
-    marginBottom: SPACING.sm,
-  },
-  upcomingCardDate: {
-    fontFamily: FONTS.bodySemiBold,
-    fontSize: 16,
-    color: COLORS.text,
-  },
-  homeTag: {
-    backgroundColor: "#FCEFC7",
-    borderRadius: RADII.pill,
-    paddingHorizontal: 12,
-    paddingVertical: 4,
-  },
-  homeTagText: {
-    fontFamily: FONTS.bodySemiBold,
-    fontSize: 16,
-    color: COLORS.accentDark,
-  },
-  upcomingCardTeams: {
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "center",
-    gap: SPACING.md,
-  },
-  teamChipSmall: {
-    width: 46,
-    height: 46,
-    borderRadius: 23,
-    backgroundColor: COLORS.surface,
-    alignItems: "center",
-    justifyContent: "center",
-  },
-  teamChipSmallText: {
-    fontFamily: FONTS.bodySemiBold,
-    fontSize: 16,
-    color: COLORS.primary,
-  },
-  vsSmall: {
-    fontFamily: FONTS.body,
-    fontSize: 16,
-    color: COLORS.textMuted,
   },
   newsCard: {
     flexDirection: "row",

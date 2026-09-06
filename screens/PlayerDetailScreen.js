@@ -8,6 +8,7 @@ import {
     View,
 } from "react-native";
 
+import ModalHeader from "../components/ModalHeader";
 import { COLORS, FONTS, RADII, SPACING } from "../constants/theme";
 import { getPlayer } from "../services/api";
 
@@ -51,18 +52,24 @@ export default function PlayerDetailScreen({ route }) {
 
   if (loading) {
     return (
-      <View style={styles.center}>
-        <ActivityIndicator size="large" color={COLORS.primary} />
+      <View style={styles.screen}>
+        <ModalHeader title="Speler" />
+        <View style={styles.center}>
+          <ActivityIndicator size="large" color={COLORS.primary} />
+        </View>
       </View>
     );
   }
 
   if (error || !player) {
     return (
-      <View style={styles.center}>
-        <Text style={styles.errorText}>
-          {error || "Speler niet gevonden."}
-        </Text>
+      <View style={styles.screen}>
+        <ModalHeader title="Speler" />
+        <View style={styles.center}>
+          <Text style={styles.errorText}>
+            {error || "Speler niet gevonden."}
+          </Text>
+        </View>
       </View>
     );
   }
@@ -70,47 +77,54 @@ export default function PlayerDetailScreen({ route }) {
   const birthDate = formatBirthDate(player.birthDate);
 
   return (
-    <ScrollView contentContainerStyle={styles.container}>
-      <View style={styles.header}>
-        {player.image ? (
-          <Image source={{ uri: player.image }} style={styles.avatar} />
-        ) : (
-          <View style={styles.avatarFallback}>
-            <Text style={styles.avatarFallbackText}>
-              {player.number ?? "?"}
-            </Text>
+    <View style={styles.screen}>
+      <ModalHeader title="Speler" />
+      <ScrollView contentContainerStyle={styles.container}>
+        <View style={styles.header}>
+          {player.image ? (
+            <Image source={{ uri: player.image }} style={styles.avatar} />
+          ) : (
+            <View style={styles.avatarFallback}>
+              <Text style={styles.avatarFallbackText}>
+                {player.number ?? "?"}
+              </Text>
+            </View>
+          )}
+
+          <Text style={styles.name}>
+            {player.firstName} {player.lastName}
+          </Text>
+          <Text style={styles.position}>{player.position}</Text>
+        </View>
+
+        <View style={styles.statsRow}>
+          <View style={styles.statBox}>
+            <Text style={styles.statLabel}>Rugnummer</Text>
+            <Text style={styles.statValue}>{player.number ?? "-"}</Text>
           </View>
-        )}
 
-        <Text style={styles.name}>
-          {player.firstName} {player.lastName}
-        </Text>
-        <Text style={styles.position}>{player.position}</Text>
-      </View>
-
-      <View style={styles.statsRow}>
-        <View style={styles.statBox}>
-          <Text style={styles.statLabel}>Rugnummer</Text>
-          <Text style={styles.statValue}>{player.number ?? "-"}</Text>
+          <View style={styles.statBox}>
+            <Text style={styles.statLabel}>Geboortedatum</Text>
+            <Text style={styles.statValue}>{birthDate ?? "-"}</Text>
+          </View>
         </View>
 
-        <View style={styles.statBox}>
-          <Text style={styles.statLabel}>Geboortedatum</Text>
-          <Text style={styles.statValue}>{birthDate ?? "-"}</Text>
-        </View>
-      </View>
-
-      {player.bio ? (
-        <View style={styles.bioBox}>
-          <Text style={styles.bioTitle}>Over {player.firstName}</Text>
-          <Text style={styles.bioText}>{player.bio}</Text>
-        </View>
-      ) : null}
-    </ScrollView>
+        {player.bio ? (
+          <View style={styles.bioBox}>
+            <Text style={styles.bioTitle}>Over {player.firstName}</Text>
+            <Text style={styles.bioText}>{player.bio}</Text>
+          </View>
+        ) : null}
+      </ScrollView>
+    </View>
   );
 }
 
 const styles = StyleSheet.create({
+  screen: {
+    flex: 1,
+    backgroundColor: COLORS.background,
+  },
   center: {
     flex: 1,
     justifyContent: "center",

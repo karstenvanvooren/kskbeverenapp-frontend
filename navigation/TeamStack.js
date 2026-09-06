@@ -17,12 +17,12 @@ export default function TeamStack() {
       <Stack.Screen
         name="TeamMain"
         component={TeamScreen}
-        options={{ title: "Team" }}
+        options={{ headerShown: false }}
       />
       <Stack.Screen
         name="PlayerDetail"
         component={PlayerDetailScreen}
-        options={{ title: "Speler" }}
+        options={{ headerShown: false, presentation: "modal" }}
       />
     </Stack.Navigator>
   );

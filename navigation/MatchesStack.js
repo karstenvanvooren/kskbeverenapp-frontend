@@ -18,12 +18,12 @@ export default function MatchesStack() {
       <Stack.Screen
         name="MatchesMain"
         component={MatchesScreen}
-        options={{ title: "Wedstrijden" }}
+        options={{ headerShown: false }}
       />
       <Stack.Screen
         name="MatchDetail"
         component={MatchDetailScreen}
-        options={{ title: "Wedstrijd" }}
+        options={{ headerShown: false, presentation: "modal" }}
       />
       <Stack.Screen
         name="Motm"

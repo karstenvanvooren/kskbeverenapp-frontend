@@ -24,7 +24,7 @@ export default function HomeStack() {
       <Stack.Screen
         name="MatchDetail"
         component={MatchDetailScreen}
-        options={{ title: "Wedstrijd" }}
+        options={{ headerShown: false, presentation: "modal" }}
       />
       <Stack.Screen
         name="Motm"
@@ -34,7 +34,7 @@ export default function HomeStack() {
       <Stack.Screen
         name="NewsDetail"
         component={NewsDetailScreen}
-        options={{ title: "Nieuws" }}
+        options={{ headerShown: false, presentation: "modal" }}
       />
     </Stack.Navigator>
   );
