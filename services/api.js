@@ -1,4 +1,6 @@
-const API_URL = "http://192.168.0.10";
+// Local network IP of the machine running the backend (`npm start` in kskbeverenapp-backend),
+// so phones/simulators on the same Wi-Fi can reach it. Update this if your computer's IP changes.
+const API_URL = "http://192.168.0.10:3000";
 
 // ==========================================
 // USERS
