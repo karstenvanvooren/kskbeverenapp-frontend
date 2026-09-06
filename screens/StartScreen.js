@@ -1,43 +1,55 @@
-import { Pressable, StyleSheet, Text, View } from "react-native";
+import { Image, Pressable, StyleSheet, Text, View } from "react-native";
 
 import { COLORS, FONTS, RADII, SPACING } from "../constants/theme";
 import { useAuth } from "../context/AuthContext";
+
+const logo = require("../assets/images/logo.png");
+const leeuw = require("../assets/images/leeuw.png");
 
 export default function StartScreen({ navigation }) {
   const { continueAsGuest } = useAuth();
 
   return (
     <View style={styles.container}>
-      <View style={styles.hero}>
-        {/* TODO: swap for the real crest once we have a transparent PNG/SVG */}
-        <View style={styles.crestPlaceholder}>
-          <Text style={styles.crestText}>KSK</Text>
+      <Image
+        source={leeuw}
+        style={styles.watermark}
+        resizeMode="contain"
+        pointerEvents="none"
+      />
+
+      <Image source={logo} style={styles.crest} resizeMode="contain" />
+
+      <View style={styles.bottom}>
+        <View style={styles.titleBlock}>
+          <Text style={styles.title}>KSK</Text>
+          <Text style={styles.title}>Beveren</Text>
         </View>
 
-        <Text style={styles.title}>KSK BEVEREN</Text>
         <Text style={styles.tagline}>
-          Nieuws, wedstrijden en je favoriete spelers — alles op één plek.
+          Log in om het laatste nieuws, wedstrijden en community-updates te
+          volgen.
         </Text>
-      </View>
 
-      <View style={styles.actions}>
-        <Pressable
-          style={styles.primaryButton}
-          onPress={() => navigation.navigate("Login")}
-        >
-          <Text style={styles.primaryButtonText}>Inloggen</Text>
-        </Pressable>
+        <View style={styles.actions}>
+          <Pressable
+            style={styles.primaryButton}
+            onPress={() => navigation.navigate("Login")}
+          >
+            <Text style={styles.primaryButtonText}>LOG IN</Text>
+          </Pressable>
 
-        <Pressable
-          style={styles.secondaryButton}
-          onPress={() => navigation.navigate("Register")}
-        >
-          <Text style={styles.secondaryButtonText}>Account aanmaken</Text>
-        </Pressable>
+          <Pressable
+            style={styles.secondaryButton}
+            onPress={() => navigation.navigate("Register")}
+          >
+            <Text style={styles.secondaryButtonText}>SIGN UP</Text>
+          </Pressable>
 
-        <Pressable style={styles.guestLink} onPress={continueAsGuest}>
-          <Text style={styles.guestLinkText}>Verder zonder account</Text>
-        </Pressable>
+          <Pressable style={styles.guestLink} onPress={continueAsGuest}>
+            <Text style={styles.guestLinkText}>Verder zonder account</Text>
+          </Pressable>
+        </View>
       </View>
     </View>
   );
@@ -47,43 +59,42 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: COLORS.primary,
-    justifyContent: "space-between",
+    overflow: "hidden",
     paddingHorizontal: SPACING.xxl,
-    paddingTop: 100,
+    paddingTop: 64,
     paddingBottom: 48,
   },
-  hero: {
-    alignItems: "center",
+  watermark: {
+    position: "absolute",
+    top: -40,
+    right: -130,
+    width: 380,
+    height: 460,
+    opacity: 0.16,
   },
-  crestPlaceholder: {
-    width: 96,
-    height: 96,
-    borderRadius: RADII.lg,
-    backgroundColor: COLORS.accent,
-    alignItems: "center",
-    justifyContent: "center",
-    marginBottom: SPACING.xl,
+  crest: {
+    width: 64,
+    height: 64,
   },
-  crestText: {
-    fontFamily: FONTS.display,
-    fontSize: 24,
-    color: COLORS.textOnAccent,
+  bottom: {
+    marginTop: "auto",
+  },
+  titleBlock: {
+    marginBottom: SPACING.lg,
   },
   title: {
     fontFamily: FONTS.display,
-    fontSize: 32,
-    color: COLORS.white,
-    letterSpacing: 1,
-    marginBottom: SPACING.md,
-    textAlign: "center",
+    fontSize: 40,
+    lineHeight: 44,
+    color: COLORS.accent,
+    letterSpacing: 0.5,
   },
   tagline: {
     fontFamily: FONTS.body,
-    fontSize: 15,
+    fontSize: 14,
     color: "#DCE4F7",
-    textAlign: "center",
-    lineHeight: 22,
-    paddingHorizontal: SPACING.md,
+    lineHeight: 20,
+    marginBottom: SPACING.xxl,
   },
   actions: {
     gap: SPACING.md,
@@ -96,7 +107,8 @@ const styles = StyleSheet.create({
   },
   primaryButtonText: {
     fontFamily: FONTS.button,
-    fontSize: 16,
+    fontSize: 15,
+    letterSpacing: 0.5,
     color: COLORS.textOnAccent,
   },
   secondaryButton: {
@@ -104,12 +116,13 @@ const styles = StyleSheet.create({
     paddingVertical: 16,
     alignItems: "center",
     borderWidth: 1.5,
-    borderColor: COLORS.white,
+    borderColor: COLORS.accent,
   },
   secondaryButtonText: {
     fontFamily: FONTS.button,
-    fontSize: 16,
-    color: COLORS.white,
+    fontSize: 15,
+    letterSpacing: 0.5,
+    color: COLORS.accent,
   },
   guestLink: {
     alignItems: "center",
@@ -117,7 +130,7 @@ const styles = StyleSheet.create({
   },
   guestLinkText: {
     fontFamily: FONTS.bodyMedium,
-    fontSize: 14,
+    fontSize: 13,
     color: "#DCE4F7",
     textDecorationLine: "underline",
   },
