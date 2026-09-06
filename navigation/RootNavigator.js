@@ -1,16 +1,21 @@
 import { NavigationContainer } from "@react-navigation/native";
+import { createNativeStackNavigator } from "@react-navigation/native-stack";
 import { ActivityIndicator, StyleSheet, Text, View } from "react-native";
 
 import { COLORS, FONTS } from "../constants/theme";
 import { useAuth } from "../context/AuthContext";
 import MainTabs from "./MainTabs";
+import ProfileStack from "./ProfileStack";
 import StartStack from "./StartStack";
+
+const Stack = createNativeStackNavigator();
 
 // First launch (or after logout) shows the branded Start screen. From there
 // you can log in, register, or continue as a guest — either way you land on
-// MainTabs. Once past Start, club content stays public; only the Profile
-// tab, commenting and MOTM voting ask for an account (see ProfileStack,
-// NewsDetailScreen, MotmScreen).
+// MainTabs. Profile no longer lives in the bottom tab bar; it's a modal
+// pushed from the top-right icon on the main screens, reachable from
+// anywhere via navigation.navigate("Profile") (React Navigation bubbles
+// that call up to this root stack automatically).
 export default function RootNavigator() {
   const { isLoading, canBrowse } = useAuth();
 
@@ -25,7 +30,18 @@ export default function RootNavigator() {
 
   return (
     <NavigationContainer>
-      {canBrowse ? <MainTabs /> : <StartStack />}
+      {canBrowse ? (
+        <Stack.Navigator screenOptions={{ headerShown: false }}>
+          <Stack.Screen name="MainTabs" component={MainTabs} />
+          <Stack.Screen
+            name="Profile"
+            component={ProfileStack}
+            options={{ presentation: "modal" }}
+          />
+        </Stack.Navigator>
+      ) : (
+        <StartStack />
+      )}
     </NavigationContainer>
   );
 }

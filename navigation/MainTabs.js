@@ -5,7 +5,6 @@ import { COLORS, FONTS } from "../constants/theme";
 import HomeStack from "./HomeStack";
 import MatchesStack from "./MatchesStack";
 import NewsStack from "./NewsStack";
-import ProfileStack from "./ProfileStack";
 import TeamStack from "./TeamStack";
 
 const Tab = createBottomTabNavigator();
@@ -15,7 +14,6 @@ const ICONS = {
   Matches: "football",
   News: "newspaper",
   Team: "people",
-  Profile: "person-circle",
 };
 
 export default function MainTabs() {
@@ -38,31 +36,14 @@ export default function MainTabs() {
         ),
       })}
     >
-      <Tab.Screen
-        name="Home"
-        component={HomeStack}
-        options={{ title: "Home" }}
-      />
+      <Tab.Screen name="Home" component={HomeStack} options={{ title: "Home" }} />
       <Tab.Screen
         name="Matches"
         component={MatchesStack}
         options={{ title: "Wedstrijden" }}
       />
-      <Tab.Screen
-        name="News"
-        component={NewsStack}
-        options={{ title: "Nieuws" }}
-      />
-      <Tab.Screen
-        name="Team"
-        component={TeamStack}
-        options={{ title: "Team" }}
-      />
-      <Tab.Screen
-        name="Profile"
-        component={ProfileStack}
-        options={{ title: "Profiel" }}
-      />
+      <Tab.Screen name="News" component={NewsStack} options={{ title: "Nieuws" }} />
+      <Tab.Screen name="Team" component={TeamStack} options={{ title: "Team" }} />
     </Tab.Navigator>
   );
 }

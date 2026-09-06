@@ -66,15 +66,15 @@ const styles = StyleSheet.create({
   },
   watermark: {
     position: "absolute",
-    top: -40,
-    right: -130,
-    width: 380,
-    height: 460,
-    opacity: 0.16,
+    top: -60,
+    right: -180,
+    width: 560,
+    height: 700,
+    opacity: 0.18,
   },
   crest: {
-    width: 64,
-    height: 64,
+    width: 96,
+    height: 96,
   },
   bottom: {
     marginTop: "auto",
@@ -91,9 +91,9 @@ const styles = StyleSheet.create({
   },
   tagline: {
     fontFamily: FONTS.body,
-    fontSize: 14,
-    color: "#DCE4F7",
-    lineHeight: 20,
+    fontSize: 16,
+    color: COLORS.accent,
+    lineHeight: 22,
     marginBottom: SPACING.xxl,
   },
   actions: {
@@ -106,8 +106,8 @@ const styles = StyleSheet.create({
     alignItems: "center",
   },
   primaryButtonText: {
-    fontFamily: FONTS.button,
-    fontSize: 15,
+    fontFamily: FONTS.heading,
+    fontSize: 16,
     letterSpacing: 0.5,
     color: COLORS.textOnAccent,
   },
@@ -119,8 +119,8 @@ const styles = StyleSheet.create({
     borderColor: COLORS.accent,
   },
   secondaryButtonText: {
-    fontFamily: FONTS.button,
-    fontSize: 15,
+    fontFamily: FONTS.heading,
+    fontSize: 16,
     letterSpacing: 0.5,
     color: COLORS.accent,
   },
@@ -130,8 +130,8 @@ const styles = StyleSheet.create({
   },
   guestLinkText: {
     fontFamily: FONTS.bodyMedium,
-    fontSize: 13,
-    color: "#DCE4F7",
+    fontSize: 14,
+    color: COLORS.accent,
     textDecorationLine: "underline",
   },
 });

@@ -1,4 +1,6 @@
+import { Ionicons } from "@expo/vector-icons";
 import { createNativeStackNavigator } from "@react-navigation/native-stack";
+import { Pressable } from "react-native";
 
 import { COLORS, FONTS } from "../constants/theme";
 import { useAuth } from "../context/AuthContext";
@@ -8,6 +10,14 @@ import RegisterScreen from "../screens/RegisterScreen";
 
 const Stack = createNativeStackNavigator();
 
+function CloseButton({ navigation }) {
+  return (
+    <Pressable hitSlop={8} onPress={() => navigation.goBack()}>
+      <Ionicons name="close" size={26} color={COLORS.primary} />
+    </Pressable>
+  );
+}
+
 // Standard React Navigation "auth flow" pattern: which screens exist in this
 // stack depends on login state, so logging in/out automatically swaps them.
 export default function ProfileStack() {
@@ -15,10 +25,11 @@ export default function ProfileStack() {
 
   return (
     <Stack.Navigator
-      screenOptions={{
+      screenOptions={({ navigation }) => ({
         headerTintColor: COLORS.primary,
         headerTitleStyle: { fontFamily: FONTS.heading },
-      }}
+        headerLeft: () => <CloseButton navigation={navigation} />,
+      })}
     >
       {isAuthenticated ? (
         <Stack.Screen
