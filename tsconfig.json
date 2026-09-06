@@ -4,15 +4,15 @@
     "strict": true,
     "allowJs": true,
     "paths": {
-      "@/assets/*": ["./assets/*"]
+      "@/assets/*": [
+        "./assets/*"
+      ]
     }
   },
   "include": [
     "**/*.ts",
     "**/*.tsx",
     "**/*.js",
-    "**/*.jsx",
-    ".expo/types/**/*.ts",
-    "expo-env.d.ts"
+    "**/*.jsx"
   ]
 }
