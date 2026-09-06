@@ -1,109 +1,65 @@
-import { useFocusEffect } from "@react-navigation/native";
-import { useCallback, useState } from "react";
+import { useEffect, useState } from "react";
 import {
     ActivityIndicator,
-    FlatList,
     Image,
-    KeyboardAvoidingView,
-    Platform,
     Pressable,
+    ScrollView,
     StyleSheet,
     Text,
-    TextInput,
     View,
 } from "react-native";
 
 import ModalHeader from "../components/ModalHeader";
 import { COLORS, FONTS, RADII, SPACING } from "../constants/theme";
-import { useAuth } from "../context/AuthContext";
-import {
-    addComment,
-    deleteComment,
-    getComments,
-    getNewsArticle,
-} from "../services/api";
+import { getMatch } from "../services/api";
+
+const STATUS_LABELS = {
+  upcoming: "Komende wedstrijd",
+  live: "Live bezig",
+  finished: "Wedstrijd afgelopen",
+};
 
 function formatDate(value) {
   return new Date(value).toLocaleDateString("nl-BE", {
+    weekday: "long",
     day: "numeric",
     month: "long",
     year: "numeric",
   });
 }
 
-function formatCommentDate(value) {
-  return new Date(value).toLocaleDateString("nl-BE", {
-    day: "numeric",
-    month: "short",
-    hour: "2-digit",
-    minute: "2-digit",
-  });
-}
+export default function MatchDetailScreen({ route, navigation }) {
+  const { matchId } = route.params;
 
-export default function NewsDetailScreen({ route, navigation }) {
-  const { newsId } = route.params;
-  const { user, isAuthenticated } = useAuth();
-
-  const [article, setArticle] = useState(null);
-  const [comments, setComments] = useState([]);
-  const [commentText, setCommentText] = useState("");
+  const [match, setMatch] = useState(null);
   const [loading, setLoading] = useState(true);
-  const [posting, setPosting] = useState(false);
   const [error, setError] = useState("");
 
-  const loadData = useCallback(async () => {
-    try {
-      setLoading(true);
-      const [articleData, commentsData] = await Promise.all([
-        getNewsArticle(newsId),
-        getComments(newsId),
-      ]);
-      setArticle(articleData);
-      setComments(commentsData);
-      setError("");
-    } catch (loadError) {
-      setError(loadError.message);
-    } finally {
-      setLoading(false);
+  useEffect(() => {
+    let isActive = true;
+
+    async function loadMatch() {
+      try {
+        const data = await getMatch(matchId);
+        if (isActive) setMatch(data);
+      } catch (loadError) {
+        if (isActive) setError(loadError.message);
+      } finally {
+        if (isActive) setLoading(false);
+      }
     }
-  }, [newsId]);
 
-  useFocusEffect(
-    useCallback(() => {
-      loadData();
-    }, [loadData])
-  );
+    loadMatch();
 
-  async function handleAddComment() {
-    if (!commentText.trim()) return;
-
-    setPosting(true);
-
-    try {
-      await addComment(newsId, user.id, commentText.trim());
-      setCommentText("");
-      const refreshed = await getComments(newsId);
-      setComments(refreshed);
-    } catch (postError) {
-      setError(postError.message);
-    } finally {
-      setPosting(false);
-    }
-  }
-
-  async function handleDeleteComment(commentId) {
-    try {
-      await deleteComment(commentId);
-      setComments((current) => current.filter((c) => c._id !== commentId));
-    } catch (deleteError) {
-      setError(deleteError.message);
-    }
-  }
+    return () => {
+      isActive = false;
+    };
+  }, [matchId]);
 
   if (loading) {
     return (
-      <View style={styles.flex}>
-        <ModalHeader title="Artikel" />
+      <View style={styles.screen}>
+        <ModalHeader title="Wedstrijd" />
         <View style={styles.center}>
           <ActivityIndicator size="large" color={COLORS.primary} />
         </View>
@@ -111,114 +67,96 @@ export default function NewsDetailScreen({ route, navigation }) {
     );
   }
 
-  if (error && !article) {
+  if (error || !match) {
     return (
-      <View style={styles.flex}>
-        <ModalHeader title="Artikel" />
+      <View style={styles.screen}>
+        <ModalHeader title="Wedstrijd" />
         <View style={styles.center}>
-          <Text style={styles.errorText}>{error}</Text>
+          <Text style={styles.errorText}>
+            {error || "Wedstrijd niet gevonden."}
+          </Text>
         </View>
       </View>
     );
   }
 
+  const homeTeam = match.home ? "KSK Beveren" : match.opponent;
+  const awayTeam = match.home ? match.opponent : "KSK Beveren";
+  const homeScore = match.home ? match.homeScore : match.awayScore;
+  const awayScore = match.home ? match.awayScore : match.homeScore;
+
   return (
-    <View style={styles.flex}>
-      <ModalHeader title="Artikel" />
-      <KeyboardAvoidingView
-        style={styles.flex}
-        behavior={Platform.OS === "ios" ? "padding" : undefined}
-        keyboardVerticalOffset={90}
-      >
-      <FlatList
-        contentContainerStyle={styles.list}
-        data={comments}
-        keyExtractor={(item) => item._id}
-        ListHeaderComponent={
-          <View>
-            {article.image ? (
-              <Image source={{ uri: article.image }} style={styles.image} />
+    <View style={styles.screen}>
+      <ModalHeader title="Wedstrijd" />
+      <ScrollView contentContainerStyle={styles.container}>
+        <Text style={styles.status}>
+          {STATUS_LABELS[match.status] ?? match.status}
+        </Text>
+
+        <View style={styles.matchupBox}>
+          <View style={styles.teamColumn}>
+            {match.home ? null : match.opponentLogo ? (
+              <Image
+                source={{ uri: match.opponentLogo }}
+                style={styles.crest}
+              />
             ) : null}
-
-            <View style={styles.body}>
-              <Text style={styles.category}>{article.category}</Text>
-              <Text style={styles.title}>{article.title}</Text>
-              <Text style={styles.meta}>
-                {article.author} · {formatDate(article.publishedAt)}
-              </Text>
-              <Text style={styles.content}>{article.content}</Text>
-            </View>
-
-            <View style={styles.commentsHeader}>
-              <Text style={styles.commentsTitle}>
-                Reacties ({comments.length})
-              </Text>
-            </View>
+            <Text style={styles.teamName}>{homeTeam}</Text>
           </View>
-        }
-        renderItem={({ item }) => (
-          <View style={styles.comment}>
-            <View style={styles.commentHeaderRow}>
-              <Text style={styles.commentAuthor}>
-                {item.userId?.username ?? "Onbekend"}
-              </Text>
-              <Text style={styles.commentDate}>
-                {formatCommentDate(item.createdAt)}
-              </Text>
-            </View>
-            <Text style={styles.commentText}>{item.content}</Text>
 
-            {user && item.userId?._id === user.id ? (
-              <Pressable onPress={() => handleDeleteComment(item._id)}>
-                <Text style={styles.deleteLink}>Verwijderen</Text>
-              </Pressable>
-            ) : null}
-          </View>
-        )}
-        ListEmptyComponent={
-          <Text style={styles.noComments}>
-            Nog geen reacties. Wees de eerste!
-          </Text>
-        }
-        ListFooterComponent={<View style={{ height: 24 }} />}
-      />
-
-      {isAuthenticated ? (
-        <View style={styles.inputRow}>
-          <TextInput
-            style={styles.input}
-            value={commentText}
-            onChangeText={setCommentText}
-            placeholder="Schrijf een reactie..."
-            multiline
-          />
-          <Pressable
-            style={[styles.sendButton, posting && styles.sendButtonDisabled]}
-            onPress={handleAddComment}
-            disabled={posting}
-          >
-            <Text style={styles.sendButtonText}>
-              {posting ? "..." : "Post"}
+          {match.status === "finished" ? (
+            <Text style={styles.score}>
+              {homeScore} - {awayScore}
             </Text>
-          </Pressable>
+          ) : (
+            <Text style={styles.vs}>vs</Text>
+          )}
+
+          <View style={styles.teamColumn}>
+            {match.home && match.opponentLogo ? (
+              <Image
+                source={{ uri: match.opponentLogo }}
+                style={styles.crest}
+              />
+            ) : null}
+            <Text style={styles.teamName}>{awayTeam}</Text>
+          </View>
         </View>
-      ) : (
-        <Pressable
-          style={styles.loginBanner}
-          onPress={() => navigation.navigate("Profile")}
-        >
-          <Text style={styles.loginBannerText}>
-            Log in om te reageren →
-          </Text>
-        </Pressable>
-      )}
-      </KeyboardAvoidingView>
+
+        <View style={styles.infoBox}>
+          <InfoRow label="Competitie" value={match.competition} />
+          {match.matchday ? (
+            <InfoRow label="Speeldag" value={String(match.matchday)} />
+          ) : null}
+          <InfoRow label="Datum" value={formatDate(match.date)} />
+          <InfoRow label="Aftrap" value={match.time} />
+          <InfoRow label="Locatie" value={match.location} />
+        </View>
+
+        {match.status === "finished" ? (
+          <Pressable
+            style={styles.motmButton}
+            onPress={() => navigation.navigate("Motm", { matchId: match._id })}
+          >
+            <Text style={styles.motmButtonText}>⚽ Man of the Match</Text>
+          </Pressable>
+        ) : null}
+      </ScrollView>
+    </View>
+  );
+}
+
+function InfoRow({ label, value }) {
+  return (
+    <View style={styles.infoRow}>
+      <Text style={styles.infoLabel}>{label}</Text>
+      <Text style={styles.infoValue}>{value}</Text>
     </View>
   );
 }
 
 const styles = StyleSheet.create({
-  flex: {
+  screen: {
     flex: 1,
     backgroundColor: COLORS.background,
   },
@@ -234,133 +172,81 @@ const styles = StyleSheet.create({
     color: COLORS.danger,
     textAlign: "center",
   },
-  list: {
-    paddingBottom: 12,
-  },
-  image: {
-    width: "100%",
-    height: 200,
-    backgroundColor: COLORS.border,
-  },
-  body: {
+  container: {
     padding: SPACING.xl,
   },
-  category: {
+  status: {
+    textAlign: "center",
     fontFamily: FONTS.bodySemiBold,
-    fontSize: 11,
+    fontSize: 12,
     color: COLORS.primary,
     textTransform: "uppercase",
-    marginBottom: SPACING.sm,
-  },
-  title: {
-    fontFamily: FONTS.display,
-    fontSize: 22,
-    color: COLORS.text,
-    marginBottom: SPACING.sm,
-  },
-  meta: {
-    fontFamily: FONTS.body,
-    fontSize: 12,
-    color: COLORS.textMuted,
     marginBottom: SPACING.lg,
   },
-  content: {
-    fontFamily: FONTS.body,
-    fontSize: 15,
-    lineHeight: 22,
-    color: COLORS.text,
+  matchupBox: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+    marginBottom: SPACING.xxl,
   },
-  commentsHeader: {
-    paddingHorizontal: SPACING.xl,
-    paddingTop: SPACING.sm,
-    paddingBottom: 4,
-    borderTopWidth: StyleSheet.hairlineWidth,
-    borderTopColor: COLORS.border,
+  teamColumn: {
+    flex: 1,
+    alignItems: "center",
   },
-  commentsTitle: {
+  crest: {
+    width: 48,
+    height: 48,
+    marginBottom: SPACING.sm,
+    resizeMode: "contain",
+  },
+  teamName: {
     fontFamily: FONTS.heading,
     fontSize: 15,
     color: COLORS.text,
-  },
-  noComments: {
-    fontFamily: FONTS.body,
     textAlign: "center",
+  },
+  vs: {
+    fontFamily: FONTS.body,
+    fontSize: 16,
     color: COLORS.textMuted,
-    paddingVertical: SPACING.lg,
+    marginHorizontal: SPACING.md,
   },
-  comment: {
-    paddingHorizontal: SPACING.xl,
-    paddingVertical: SPACING.sm + 2,
-    borderBottomWidth: StyleSheet.hairlineWidth,
-    borderBottomColor: COLORS.border,
+  score: {
+    fontFamily: FONTS.display,
+    fontSize: 28,
+    color: COLORS.text,
+    marginHorizontal: SPACING.md,
   },
-  commentHeaderRow: {
+  infoBox: {
+    backgroundColor: COLORS.surface,
+    borderRadius: RADII.md,
+    padding: SPACING.lg,
+    marginBottom: SPACING.xl,
+  },
+  infoRow: {
     flexDirection: "row",
     justifyContent: "space-between",
-    marginBottom: 4,
+    paddingVertical: 6,
   },
-  commentAuthor: {
-    fontFamily: FONTS.bodySemiBold,
-    fontSize: 13,
-    color: COLORS.text,
-  },
-  commentDate: {
+  infoLabel: {
     fontFamily: FONTS.body,
-    fontSize: 11,
+    fontSize: 14,
     color: COLORS.textMuted,
   },
-  commentText: {
-    fontFamily: FONTS.body,
+  infoValue: {
+    fontFamily: FONTS.bodySemiBold,
     fontSize: 14,
     color: COLORS.text,
   },
-  deleteLink: {
-    fontFamily: FONTS.bodyMedium,
-    fontSize: 12,
-    color: COLORS.danger,
-    marginTop: SPACING.xs + 2,
+  motmButton: {
+    backgroundColor: COLORS.accent,
+    borderRadius: RADII.md,
+    paddingVertical: 14,
+    alignItems: "center",
   },
-  inputRow: {
-    flexDirection: "row",
-    alignItems: "flex-end",
-    padding: SPACING.md,
-    borderTopWidth: StyleSheet.hairlineWidth,
-    borderTopColor: COLORS.border,
-    backgroundColor: COLORS.background,
-  },
-  input: {
-    flex: 1,
-    fontFamily: FONTS.body,
-    borderWidth: 1,
-    borderColor: COLORS.border,
-    borderRadius: RADII.pill,
-    paddingHorizontal: SPACING.md + 2,
-    paddingVertical: SPACING.sm + 2,
-    maxHeight: 100,
-    marginRight: SPACING.sm,
-  },
-  sendButton: {
-    backgroundColor: COLORS.primary,
-    borderRadius: RADII.pill,
-    paddingHorizontal: SPACING.lg,
-    paddingVertical: SPACING.sm + 2,
-  },
-  sendButtonDisabled: {
-    opacity: 0.6,
-  },
-  sendButtonText: {
+  motmButtonText: {
     fontFamily: FONTS.button,
-    color: COLORS.white,
-  },
-  loginBanner: {
-    padding: SPACING.md + 2,
-    backgroundColor: "#EAF0FB",
-    borderTopWidth: StyleSheet.hairlineWidth,
-    borderTopColor: COLORS.border,
-  },
-  loginBannerText: {
-    fontFamily: FONTS.bodySemiBold,
-    color: COLORS.primary,
-    textAlign: "center",
+    color: COLORS.textOnAccent,
+    fontSize: 16,
   },
 });

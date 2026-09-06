@@ -12,7 +12,9 @@ import {
     TextInput,
     View,
 } from "react-native";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 
+import ModalHeader from "../components/ModalHeader";
 import { COLORS, FONTS, RADII, SPACING } from "../constants/theme";
 import { useAuth } from "../context/AuthContext";
 import {
@@ -42,6 +44,7 @@ function formatCommentDate(value) {
 export default function NewsDetailScreen({ route, navigation }) {
   const { newsId } = route.params;
   const { user, isAuthenticated } = useAuth();
+  const insets = useSafeAreaInsets();
 
   const [article, setArticle] = useState(null);
   const [comments, setComments] = useState([]);
@@ -101,26 +104,34 @@ export default function NewsDetailScreen({ route, navigation }) {
 
   if (loading) {
     return (
-      <View style={styles.center}>
-        <ActivityIndicator size="large" color={COLORS.primary} />
+      <View style={styles.flex}>
+        <ModalHeader title="Artikel" />
+        <View style={styles.center}>
+          <ActivityIndicator size="large" color={COLORS.primary} />
+        </View>
       </View>
     );
   }
 
   if (error && !article) {
     return (
-      <View style={styles.center}>
-        <Text style={styles.errorText}>{error}</Text>
+      <View style={styles.flex}>
+        <ModalHeader title="Artikel" />
+        <View style={styles.center}>
+          <Text style={styles.errorText}>{error}</Text>
+        </View>
       </View>
     );
   }
 
   return (
-    <KeyboardAvoidingView
-      style={styles.flex}
-      behavior={Platform.OS === "ios" ? "padding" : undefined}
-      keyboardVerticalOffset={90}
-    >
+    <View style={styles.flex}>
+      <ModalHeader title="Artikel" />
+      <KeyboardAvoidingView
+        style={styles.flex}
+        behavior={Platform.OS === "ios" ? "padding" : undefined}
+        keyboardVerticalOffset={90}
+      >
       <FlatList
         contentContainerStyle={styles.list}
         data={comments}
@@ -175,7 +186,12 @@ export default function NewsDetailScreen({ route, navigation }) {
       />
 
       {isAuthenticated ? (
-        <View style={styles.inputRow}>
+        <View
+          style={[
+            styles.inputRow,
+            { paddingBottom: SPACING.md + insets.bottom },
+          ]}
+        >
           <TextInput
             style={styles.input}
             value={commentText}
@@ -195,7 +211,10 @@ export default function NewsDetailScreen({ route, navigation }) {
         </View>
       ) : (
         <Pressable
-          style={styles.loginBanner}
+          style={[
+            styles.loginBanner,
+            { paddingBottom: SPACING.md + 2 + insets.bottom },
+          ]}
           onPress={() => navigation.navigate("Profile")}
         >
           <Text style={styles.loginBannerText}>
@@ -203,7 +222,8 @@ export default function NewsDetailScreen({ route, navigation }) {
           </Text>
         </Pressable>
       )}
-    </KeyboardAvoidingView>
+      </KeyboardAvoidingView>
+    </View>
   );
 }
 

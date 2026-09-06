@@ -1,7 +1,9 @@
+import { Ionicons } from "@expo/vector-icons";
 import { useFocusEffect } from "@react-navigation/native";
-import { useCallback, useState } from "react";
+import { useCallback, useMemo, useState } from "react";
 import {
     ActivityIndicator,
+    Dimensions,
     FlatList,
     Image,
     Pressable,
@@ -12,7 +14,11 @@ import {
 
 import ScreenHeader from "../components/ScreenHeader";
 import { COLORS, FONTS, RADII, SPACING } from "../constants/theme";
-import { getNews } from "../services/api";
+import { getComments, getNews } from "../services/api";
+
+const SCREEN_WIDTH = Dimensions.get("window").width;
+const CARD_WIDTH = SCREEN_WIDTH - SPACING.xl * 2;
+const CARD_GAP = SPACING.md;
 
 function formatDate(value) {
   return new Date(value).toLocaleDateString("nl-BE", {
@@ -24,8 +30,10 @@ function formatDate(value) {
 
 export default function NewsScreen({ navigation }) {
   const [articles, setArticles] = useState([]);
+  const [commentCounts, setCommentCounts] = useState({});
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
+  const [activeSlide, setActiveSlide] = useState(0);
 
   useFocusEffect(
     useCallback(() => {
@@ -35,14 +43,30 @@ export default function NewsScreen({ navigation }) {
         try {
           setLoading(true);
           const data = await getNews();
+          if (!isActive) return;
+
+          setArticles(data);
+          setError("");
+          setLoading(false);
+
+          // Comment counts load in the background so the list shows up
+          // right away; "Uitgelicht" just falls back to the newest
+          // articles until the counts come in and it re-sorts.
+          const counts = await Promise.all(
+            data.map((article) =>
+              getComments(article._id)
+                .then((comments) => [article._id, comments.length])
+                .catch(() => [article._id, 0])
+            )
+          );
           if (isActive) {
-            setArticles(data);
-            setError("");
+            setCommentCounts(Object.fromEntries(counts));
           }
         } catch (loadError) {
-          if (isActive) setError(loadError.message);
-        } finally {
-          if (isActive) setLoading(false);
+          if (isActive) {
+            setError(loadError.message);
+            setLoading(false);
+          }
         }
       }
 
@@ -54,55 +78,168 @@ export default function NewsScreen({ navigation }) {
     }, [])
   );
 
+  const featured = useMemo(() => {
+    return [...articles]
+      .sort((a, b) => {
+        const countDiff =
+          (commentCounts[b._id] ?? 0) - (commentCounts[a._id] ?? 0);
+        if (countDiff !== 0) return countDiff;
+        return new Date(b.publishedAt) - new Date(a.publishedAt);
+      })
+      .slice(0, 3);
+  }, [articles, commentCounts]);
+
+  function handleSlideScrollEnd(event) {
+    const index = Math.round(
+      event.nativeEvent.contentOffset.x / (CARD_WIDTH + CARD_GAP)
+    );
+    setActiveSlide(index);
+  }
+
+  if (loading) {
+    return (
+      <View style={styles.screen}>
+        <ScreenHeader />
+        <View style={styles.center}>
+          <ActivityIndicator size="large" color={COLORS.primary} />
+        </View>
+      </View>
+    );
+  }
+
+  if (error) {
+    return (
+      <View style={styles.screen}>
+        <ScreenHeader />
+        <View style={styles.center}>
+          <Text style={styles.errorText}>{error}</Text>
+        </View>
+      </View>
+    );
+  }
+
   return (
     <View style={styles.screen}>
       <ScreenHeader />
 
-      {loading ? (
-        <View style={styles.center}>
-          <ActivityIndicator size="large" color={COLORS.primary} />
-        </View>
-      ) : error ? (
-        <View style={styles.center}>
-          <Text style={styles.errorText}>{error}</Text>
-        </View>
-      ) : (
-        <FlatList
-          contentContainerStyle={styles.list}
-          data={articles}
-          keyExtractor={(item) => item._id}
-          renderItem={({ item }) => (
-            <Pressable
-              style={styles.card}
-              onPress={() =>
-                navigation.navigate("NewsDetail", { newsId: item._id })
-              }
-            >
-              {item.image ? (
-                <Image source={{ uri: item.image }} style={styles.image} />
+      <FlatList
+        contentContainerStyle={styles.list}
+        data={articles}
+        keyExtractor={(item) => item._id}
+        ListHeaderComponent={
+          featured.length === 0 ? null : (
+            <View style={styles.featuredSection}>
+              <Text style={styles.sectionTitle}>Uitgelicht</Text>
+
+              <FlatList
+                data={featured}
+                horizontal
+                keyExtractor={(item) => item._id}
+                showsHorizontalScrollIndicator={false}
+                snapToInterval={CARD_WIDTH + CARD_GAP}
+                decelerationRate="fast"
+                contentContainerStyle={styles.carouselContent}
+                ItemSeparatorComponent={() => (
+                  <View style={{ width: CARD_GAP }} />
+                )}
+                onMomentumScrollEnd={handleSlideScrollEnd}
+                renderItem={({ item }) => (
+                  <Pressable
+                    style={styles.featuredCard}
+                    onPress={() =>
+                      navigation.navigate("NewsDetail", { newsId: item._id })
+                    }
+                  >
+                    {item.image ? (
+                      <Image
+                        source={{ uri: item.image }}
+                        style={styles.featuredImage}
+                      />
+                    ) : (
+                      <View style={styles.featuredImagePlaceholder} />
+                    )}
+
+                    <View style={styles.featuredOverlay} />
+
+                    <View style={styles.featuredBadgeRow}>
+                      <View style={styles.featuredCategory}>
+                        <Text style={styles.featuredCategoryText}>
+                          {item.category}
+                        </Text>
+                      </View>
+                      <View style={styles.commentBadge}>
+                        <Ionicons
+                          name="chatbubble-outline"
+                          size={14}
+                          color={COLORS.white}
+                        />
+                        <Text style={styles.commentBadgeText}>
+                          {commentCounts[item._id] ?? 0}
+                        </Text>
+                      </View>
+                    </View>
+
+                    <View style={styles.featuredBody}>
+                      <Text style={styles.featuredTitle} numberOfLines={2}>
+                        {item.title}
+                      </Text>
+                      <Text style={styles.featuredMeta}>
+                        {item.author} · {formatDate(item.publishedAt)}
+                      </Text>
+                    </View>
+                  </Pressable>
+                )}
+              />
+
+              {featured.length > 1 ? (
+                <View style={styles.dotsRow}>
+                  {featured.map((item, index) => (
+                    <View
+                      key={item._id}
+                      style={[
+                        styles.dot,
+                        index === activeSlide && styles.dotActive,
+                      ]}
+                    />
+                  ))}
+                </View>
               ) : null}
 
-              <View style={styles.cardBody}>
-                <Text style={styles.category}>{item.category}</Text>
-                <Text style={styles.title}>{item.title}</Text>
-                <Text style={styles.summary} numberOfLines={2}>
-                  {item.summary}
-                </Text>
-                <Text style={styles.meta}>
-                  {item.author} · {formatDate(item.publishedAt)}
-                </Text>
-              </View>
-            </Pressable>
-          )}
-          ListEmptyComponent={
-            <View style={styles.center}>
-              <Text style={styles.errorText}>
-                Geen nieuwsartikels gevonden.
+              <Text style={styles.sectionTitle}>Recente nieuws</Text>
+            </View>
+          )
+        }
+        renderItem={({ item }) => (
+          <Pressable
+            style={styles.card}
+            onPress={() =>
+              navigation.navigate("NewsDetail", { newsId: item._id })
+            }
+          >
+            {item.image ? (
+              <Image source={{ uri: item.image }} style={styles.image} />
+            ) : null}
+
+            <View style={styles.cardBody}>
+              <Text style={styles.category}>{item.category}</Text>
+              <Text style={styles.title}>{item.title}</Text>
+              <Text style={styles.summary} numberOfLines={2}>
+                {item.summary}
+              </Text>
+              <Text style={styles.meta}>
+                {item.author} · {formatDate(item.publishedAt)}
               </Text>
             </View>
-          }
-        />
-      )}
+          </Pressable>
+        )}
+        ListEmptyComponent={
+          <View style={styles.center}>
+            <Text style={styles.errorText}>
+              Geen nieuwsartikels gevonden.
+            </Text>
+          </View>
+        }
+      />
     </View>
   );
 }
@@ -121,16 +258,115 @@ const styles = StyleSheet.create({
   },
   errorText: {
     fontFamily: FONTS.body,
+    fontSize: 16,
     color: COLORS.danger,
     textAlign: "center",
   },
   list: {
-    padding: SPACING.lg,
+    paddingBottom: SPACING.xl,
     backgroundColor: COLORS.background,
+  },
+  sectionTitle: {
+    fontFamily: FONTS.heading,
+    fontSize: 20,
+    color: COLORS.text,
+    paddingHorizontal: SPACING.xl,
+    marginBottom: SPACING.md,
+  },
+  featuredSection: {
+    paddingTop: SPACING.lg,
+  },
+  carouselContent: {
+    paddingHorizontal: SPACING.xl,
+  },
+  featuredCard: {
+    width: CARD_WIDTH,
+    height: 190,
+    borderRadius: RADII.lg,
+    overflow: "hidden",
+    backgroundColor: COLORS.border,
+  },
+  featuredImage: {
+    ...StyleSheet.absoluteFillObject,
+  },
+  featuredImagePlaceholder: {
+    ...StyleSheet.absoluteFillObject,
+    backgroundColor: COLORS.primaryDark,
+  },
+  featuredOverlay: {
+    ...StyleSheet.absoluteFillObject,
+    backgroundColor: "rgba(11, 20, 44, 0.45)",
+  },
+  featuredBadgeRow: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    padding: SPACING.md,
+  },
+  featuredCategory: {
+    backgroundColor: COLORS.accent,
+    borderRadius: RADII.pill,
+    paddingHorizontal: SPACING.sm + 2,
+    paddingVertical: 4,
+  },
+  featuredCategoryText: {
+    fontFamily: FONTS.bodySemiBold,
+    fontSize: 12,
+    color: COLORS.textOnAccent,
+    textTransform: "uppercase",
+  },
+  commentBadge: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 4,
+    backgroundColor: "rgba(0,0,0,0.35)",
+    borderRadius: RADII.pill,
+    paddingHorizontal: SPACING.sm + 2,
+    paddingVertical: 4,
+  },
+  commentBadgeText: {
+    fontFamily: FONTS.bodySemiBold,
+    fontSize: 12,
+    color: COLORS.white,
+  },
+  featuredBody: {
+    position: "absolute",
+    left: 0,
+    right: 0,
+    bottom: 0,
+    padding: SPACING.md + 2,
+  },
+  featuredTitle: {
+    fontFamily: FONTS.heading,
+    fontSize: 18,
+    color: COLORS.white,
+    marginBottom: 4,
+  },
+  featuredMeta: {
+    fontFamily: FONTS.body,
+    fontSize: 16,
+    color: "#E3E8F6",
+  },
+  dotsRow: {
+    flexDirection: "row",
+    justifyContent: "center",
+    gap: 6,
+    marginTop: SPACING.sm,
+    marginBottom: SPACING.lg,
+  },
+  dot: {
+    width: 6,
+    height: 6,
+    borderRadius: 3,
+    backgroundColor: COLORS.border,
+  },
+  dotActive: {
+    width: 18,
+    backgroundColor: COLORS.primary,
   },
   card: {
     backgroundColor: COLORS.surface,
     borderRadius: RADII.lg,
+    marginHorizontal: SPACING.xl,
     marginBottom: SPACING.lg,
     overflow: "hidden",
   },
@@ -144,26 +380,26 @@ const styles = StyleSheet.create({
   },
   category: {
     fontFamily: FONTS.bodySemiBold,
-    fontSize: 11,
+    fontSize: 16,
     color: COLORS.primary,
     textTransform: "uppercase",
     marginBottom: 4,
   },
   title: {
     fontFamily: FONTS.heading,
-    fontSize: 17,
+    fontSize: 18,
     color: COLORS.text,
     marginBottom: 6,
   },
   summary: {
     fontFamily: FONTS.body,
-    fontSize: 14,
+    fontSize: 16,
     color: COLORS.textMuted,
     marginBottom: SPACING.sm,
   },
   meta: {
     fontFamily: FONTS.body,
-    fontSize: 12,
+    fontSize: 16,
     color: COLORS.textMuted,
   },
 });
