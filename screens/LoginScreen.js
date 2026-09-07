@@ -1,16 +1,17 @@
 import { useState } from "react";
 import {
-    ActivityIndicator,
-    KeyboardAvoidingView,
-    Platform,
-    Pressable,
-    ScrollView,
-    StyleSheet,
-    Text,
-    TextInput,
-    View,
+  ActivityIndicator,
+  KeyboardAvoidingView,
+  Platform,
+  Pressable,
+  ScrollView,
+  StyleSheet,
+  Text,
+  TextInput,
+  View,
 } from "react-native";
 
+import ModalHeader from "../components/ModalHeader";
 import { COLORS, FONTS, RADII, SPACING } from "../constants/theme";
 import { useAuth } from "../context/AuthContext";
 
@@ -42,66 +43,69 @@ export default function LoginScreen({ navigation }) {
   }
 
   return (
-    <KeyboardAvoidingView
-      style={styles.flex}
-      behavior={Platform.OS === "ios" ? "padding" : undefined}
-    >
-      <ScrollView contentContainerStyle={styles.container}>
-        <Text style={styles.title}>Welkom terug</Text>
-        <Text style={styles.subtitle}>
-          Log in om te reageren op nieuws, te stemmen op de Man of the Match
-          en je profiel te beheren.
-        </Text>
-
-        <View style={styles.field}>
-          <Text style={styles.label}>Email</Text>
-          <TextInput
-            style={styles.input}
-            value={email}
-            onChangeText={setEmail}
-            autoCapitalize="none"
-            autoComplete="email"
-            keyboardType="email-address"
-            placeholder="naam@voorbeeld.be"
-          />
-        </View>
-
-        <View style={styles.field}>
-          <Text style={styles.label}>Wachtwoord</Text>
-          <TextInput
-            style={styles.input}
-            value={password}
-            onChangeText={setPassword}
-            secureTextEntry
-            autoComplete="password"
-            placeholder="••••••••"
-          />
-        </View>
-
-        {error ? <Text style={styles.error}>{error}</Text> : null}
-
-        <Pressable
-          style={[styles.button, submitting && styles.buttonDisabled]}
-          onPress={handleLogin}
-          disabled={submitting}
-        >
-          {submitting ? (
-            <ActivityIndicator color={COLORS.white} />
-          ) : (
-            <Text style={styles.buttonText}>Inloggen</Text>
-          )}
-        </Pressable>
-
-        <Pressable
-          style={styles.linkRow}
-          onPress={() => navigation.navigate("Register")}
-        >
-          <Text style={styles.linkText}>
-            Nog geen account? <Text style={styles.linkBold}>Registreer</Text>
+    <View style={styles.flex}>
+      <ModalHeader title="Inloggen" />
+      <KeyboardAvoidingView
+        style={styles.flex}
+        behavior={Platform.OS === "ios" ? "padding" : undefined}
+      >
+        <ScrollView contentContainerStyle={styles.container}>
+          <Text style={styles.title}>Welkom terug</Text>
+          <Text style={styles.subtitle}>
+            Log in om te reageren op nieuws, te stemmen op de Man of the
+            Match en je profiel te beheren.
           </Text>
-        </Pressable>
-      </ScrollView>
-    </KeyboardAvoidingView>
+
+          <View style={styles.field}>
+            <Text style={styles.label}>Email</Text>
+            <TextInput
+              style={styles.input}
+              value={email}
+              onChangeText={setEmail}
+              autoCapitalize="none"
+              autoComplete="email"
+              keyboardType="email-address"
+              placeholder="naam@voorbeeld.be"
+            />
+          </View>
+
+          <View style={styles.field}>
+            <Text style={styles.label}>Wachtwoord</Text>
+            <TextInput
+              style={styles.input}
+              value={password}
+              onChangeText={setPassword}
+              secureTextEntry
+              autoComplete="password"
+              placeholder="••••••••"
+            />
+          </View>
+
+          {error ? <Text style={styles.error}>{error}</Text> : null}
+
+          <Pressable
+            style={[styles.button, submitting && styles.buttonDisabled]}
+            onPress={handleLogin}
+            disabled={submitting}
+          >
+            {submitting ? (
+              <ActivityIndicator color={COLORS.white} />
+            ) : (
+              <Text style={styles.buttonText}>Inloggen</Text>
+            )}
+          </Pressable>
+
+          <Pressable
+            style={styles.linkRow}
+            onPress={() => navigation.navigate("Register")}
+          >
+            <Text style={styles.linkText}>
+              Nog geen account? <Text style={styles.linkBold}>Registreer</Text>
+            </Text>
+          </Pressable>
+        </ScrollView>
+      </KeyboardAvoidingView>
+    </View>
   );
 }
 
@@ -123,7 +127,7 @@ const styles = StyleSheet.create({
   },
   subtitle: {
     fontFamily: FONTS.body,
-    fontSize: 14,
+    fontSize: 16,
     color: COLORS.textMuted,
     marginBottom: SPACING.xxl,
   },
@@ -132,7 +136,7 @@ const styles = StyleSheet.create({
   },
   label: {
     fontFamily: FONTS.bodySemiBold,
-    fontSize: 13,
+    fontSize: 16,
     color: COLORS.text,
     marginBottom: SPACING.sm - 2,
   },
@@ -148,6 +152,7 @@ const styles = StyleSheet.create({
   },
   error: {
     fontFamily: FONTS.body,
+    fontSize: 16,
     color: COLORS.danger,
     marginBottom: SPACING.md,
   },
@@ -172,6 +177,7 @@ const styles = StyleSheet.create({
   },
   linkText: {
     fontFamily: FONTS.body,
+    fontSize: 16,
     color: COLORS.textMuted,
   },
   linkBold: {

@@ -2,16 +2,17 @@ import { Ionicons } from "@expo/vector-icons";
 import { useFocusEffect } from "@react-navigation/native";
 import { useCallback, useMemo, useState } from "react";
 import {
-    ActivityIndicator,
-    Dimensions,
-    FlatList,
-    Image,
-    Pressable,
-    StyleSheet,
-    Text,
-    View,
+  ActivityIndicator,
+  Dimensions,
+  FlatList,
+  Image,
+  Pressable,
+  StyleSheet,
+  Text,
+  View,
 } from "react-native";
 
+import NewsListCard from "../components/NewsListCard";
 import ScreenHeader from "../components/ScreenHeader";
 import { COLORS, FONTS, RADII, SPACING } from "../constants/theme";
 import { getComments, getNews } from "../services/api";
@@ -150,32 +151,32 @@ export default function NewsScreen({ navigation }) {
                       navigation.navigate("NewsDetail", { newsId: item._id })
                     }
                   >
-                    {item.image ? (
-                      <Image
-                        source={{ uri: item.image }}
-                        style={styles.featuredImage}
-                      />
-                    ) : (
-                      <View style={styles.featuredImagePlaceholder} />
-                    )}
-
-                    <View style={styles.featuredOverlay} />
-
-                    <View style={styles.featuredBadgeRow}>
-                      <View style={styles.featuredCategory}>
-                        <Text style={styles.featuredCategoryText}>
-                          {item.category}
-                        </Text>
-                      </View>
-                      <View style={styles.commentBadge}>
-                        <Ionicons
-                          name="chatbubble-outline"
-                          size={14}
-                          color={COLORS.white}
+                    <View style={styles.featuredImageWrap}>
+                      {item.image ? (
+                        <Image
+                          source={{ uri: item.image }}
+                          style={styles.featuredImage}
                         />
-                        <Text style={styles.commentBadgeText}>
-                          {commentCounts[item._id] ?? 0}
-                        </Text>
+                      ) : (
+                        <View style={styles.featuredImagePlaceholder} />
+                      )}
+
+                      <View style={styles.featuredBadgeRow}>
+                        <View style={styles.featuredCategory}>
+                          <Text style={styles.featuredCategoryText}>
+                            {item.category}
+                          </Text>
+                        </View>
+                        <View style={styles.commentBadge}>
+                          <Ionicons
+                            name="chatbubble-outline"
+                            size={14}
+                            color={COLORS.white}
+                          />
+                          <Text style={styles.commentBadgeText}>
+                            {commentCounts[item._id] ?? 0}
+                          </Text>
+                        </View>
                       </View>
                     </View>
 
@@ -210,27 +211,12 @@ export default function NewsScreen({ navigation }) {
           )
         }
         renderItem={({ item }) => (
-          <Pressable
-            style={styles.card}
+          <NewsListCard
+            article={item}
             onPress={() =>
               navigation.navigate("NewsDetail", { newsId: item._id })
             }
-          >
-            {item.image ? (
-              <Image source={{ uri: item.image }} style={styles.image} />
-            ) : null}
-
-            <View style={styles.cardBody}>
-              <Text style={styles.category}>{item.category}</Text>
-              <Text style={styles.title}>{item.title}</Text>
-              <Text style={styles.summary} numberOfLines={2}>
-                {item.summary}
-              </Text>
-              <Text style={styles.meta}>
-                {item.author} · {formatDate(item.publishedAt)}
-              </Text>
-            </View>
-          </Pressable>
+          />
         )}
         ListEmptyComponent={
           <View style={styles.center}>
@@ -281,23 +267,29 @@ const styles = StyleSheet.create({
   },
   featuredCard: {
     width: CARD_WIDTH,
-    height: 190,
     borderRadius: RADII.lg,
     overflow: "hidden",
+    backgroundColor: COLORS.surface,
+  },
+  featuredImageWrap: {
+    width: "100%",
+    height: 150,
     backgroundColor: COLORS.border,
   },
   featuredImage: {
-    ...StyleSheet.absoluteFillObject,
+    width: "100%",
+    height: "100%",
   },
   featuredImagePlaceholder: {
-    ...StyleSheet.absoluteFillObject,
+    width: "100%",
+    height: "100%",
     backgroundColor: COLORS.primaryDark,
   },
-  featuredOverlay: {
-    ...StyleSheet.absoluteFillObject,
-    backgroundColor: "rgba(11, 20, 44, 0.45)",
-  },
   featuredBadgeRow: {
+    position: "absolute",
+    top: 0,
+    left: 0,
+    right: 0,
     flexDirection: "row",
     justifyContent: "space-between",
     padding: SPACING.md,
@@ -318,7 +310,7 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "center",
     gap: 4,
-    backgroundColor: "rgba(0,0,0,0.35)",
+    backgroundColor: "rgba(0,0,0,0.45)",
     borderRadius: RADII.pill,
     paddingHorizontal: SPACING.sm + 2,
     paddingVertical: 4,
@@ -329,22 +321,18 @@ const styles = StyleSheet.create({
     color: COLORS.white,
   },
   featuredBody: {
-    position: "absolute",
-    left: 0,
-    right: 0,
-    bottom: 0,
     padding: SPACING.md + 2,
   },
   featuredTitle: {
     fontFamily: FONTS.heading,
     fontSize: 18,
-    color: COLORS.white,
+    color: COLORS.text,
     marginBottom: 4,
   },
   featuredMeta: {
     fontFamily: FONTS.body,
     fontSize: 16,
-    color: "#E3E8F6",
+    color: COLORS.textMuted,
   },
   dotsRow: {
     flexDirection: "row",
@@ -362,44 +350,5 @@ const styles = StyleSheet.create({
   dotActive: {
     width: 18,
     backgroundColor: COLORS.primary,
-  },
-  card: {
-    backgroundColor: COLORS.surface,
-    borderRadius: RADII.lg,
-    marginHorizontal: SPACING.xl,
-    marginBottom: SPACING.lg,
-    overflow: "hidden",
-  },
-  image: {
-    width: "100%",
-    height: 160,
-    backgroundColor: COLORS.border,
-  },
-  cardBody: {
-    padding: SPACING.md + 2,
-  },
-  category: {
-    fontFamily: FONTS.bodySemiBold,
-    fontSize: 16,
-    color: COLORS.primary,
-    textTransform: "uppercase",
-    marginBottom: 4,
-  },
-  title: {
-    fontFamily: FONTS.heading,
-    fontSize: 18,
-    color: COLORS.text,
-    marginBottom: 6,
-  },
-  summary: {
-    fontFamily: FONTS.body,
-    fontSize: 16,
-    color: COLORS.textMuted,
-    marginBottom: SPACING.sm,
-  },
-  meta: {
-    fontFamily: FONTS.body,
-    fontSize: 16,
-    color: COLORS.textMuted,
   },
 });

@@ -1,12 +1,12 @@
 import { useFocusEffect } from "@react-navigation/native";
 import { useCallback, useState } from "react";
 import {
-    ActivityIndicator,
-    FlatList,
-    Pressable,
-    StyleSheet,
-    Text,
-    View,
+  ActivityIndicator,
+  FlatList,
+  Pressable,
+  StyleSheet,
+  Text,
+  View,
 } from "react-native";
 
 import MatchListCard from "../components/MatchListCard";
@@ -155,7 +155,7 @@ const styles = StyleSheet.create({
   tabUnderline: {
     marginTop: SPACING.xs,
     height: 2,
-    backgroundColor: COLORS.text,
+    backgroundColor: COLORS.primary,
     borderRadius: 1,
   },
   list: {

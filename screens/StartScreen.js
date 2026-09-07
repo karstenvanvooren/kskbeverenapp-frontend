@@ -66,15 +66,16 @@ const styles = StyleSheet.create({
   },
   watermark: {
     position: "absolute",
-    top: -60,
-    right: -180,
+    top: "50%",
+    marginTop: -300,
+    right: -200,
     width: 560,
     height: 700,
     opacity: 0.18,
   },
   crest: {
-    width: 96,
-    height: 96,
+    width: 140,
+    height: 140,
   },
   bottom: {
     marginTop: "auto",

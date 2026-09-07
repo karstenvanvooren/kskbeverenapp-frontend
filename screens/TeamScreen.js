@@ -1,13 +1,14 @@
 import { useFocusEffect } from "@react-navigation/native";
-import { useCallback, useState } from "react";
+import { useCallback, useMemo, useState } from "react";
 import {
-    ActivityIndicator,
-    Image,
-    Pressable,
-    SectionList,
-    StyleSheet,
-    Text,
-    View,
+  ActivityIndicator,
+  Image,
+  Pressable,
+  ScrollView,
+  SectionList,
+  StyleSheet,
+  Text,
+  View,
 } from "react-native";
 
 import ScreenHeader from "../components/ScreenHeader";
@@ -21,15 +22,26 @@ const POSITION_ORDER = [
   "Aanvaller",
 ];
 
-function groupByPosition(players) {
-  return POSITION_ORDER.map((position) => ({
-    title: position,
-    data: players.filter((player) => player.position === position),
-  })).filter((section) => section.data.length > 0);
+const FILTERS = [
+  { key: "Alle", label: "Alle" },
+  { key: "Doelman", label: "Doelmannen" },
+  { key: "Verdediger", label: "Verdedigers" },
+  { key: "Middenvelder", label: "Middenvelders" },
+  { key: "Aanvaller", label: "Aanvallers" },
+];
+
+function groupByPosition(players, positions) {
+  return positions
+    .map((position) => ({
+      title: position,
+      data: players.filter((player) => player.position === position),
+    }))
+    .filter((section) => section.data.length > 0);
 }
 
 export default function TeamScreen({ navigation }) {
-  const [sections, setSections] = useState([]);
+  const [players, setPlayers] = useState([]);
+  const [activeFilter, setActiveFilter] = useState("Alle");
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
 
@@ -40,9 +52,9 @@ export default function TeamScreen({ navigation }) {
       async function loadPlayers() {
         try {
           setLoading(true);
-          const players = await getPlayers();
+          const data = await getPlayers();
           if (isActive) {
-            setSections(groupByPosition(players));
+            setPlayers(data);
             setError("");
           }
         } catch (loadError) {
@@ -64,9 +76,42 @@ export default function TeamScreen({ navigation }) {
     }, [])
   );
 
+  const sections = useMemo(() => {
+    const positions =
+      activeFilter === "Alle" ? POSITION_ORDER : [activeFilter];
+    return groupByPosition(players, positions);
+  }, [players, activeFilter]);
+
   return (
     <View style={styles.screen}>
       <ScreenHeader />
+
+      <ScrollView
+        horizontal
+        showsHorizontalScrollIndicator={false}
+        style={styles.tabScroll}
+        contentContainerStyle={styles.tabRow}
+      >
+        {FILTERS.map((filter) => (
+          <Pressable
+            key={filter.key}
+            onPress={() => setActiveFilter(filter.key)}
+            style={styles.tabButton}
+          >
+            <Text
+              style={[
+                styles.tabText,
+                activeFilter === filter.key && styles.tabTextActive,
+              ]}
+            >
+              {filter.label}
+            </Text>
+            {activeFilter === filter.key ? (
+              <View style={styles.tabUnderline} />
+            ) : null}
+          </Pressable>
+        ))}
+      </ScrollView>
 
       {loading ? (
         <View style={styles.center}>
@@ -80,10 +125,13 @@ export default function TeamScreen({ navigation }) {
         <SectionList
           contentContainerStyle={styles.list}
           sections={sections}
+          stickySectionHeadersEnabled={false}
           keyExtractor={(item) => item._id}
-          renderSectionHeader={({ section }) => (
-            <Text style={styles.sectionHeader}>{section.title}</Text>
-          )}
+          renderSectionHeader={({ section }) =>
+            activeFilter === "Alle" ? (
+              <Text style={styles.sectionHeader}>{section.title}</Text>
+            ) : null
+          }
           renderItem={({ item }) => (
             <Pressable
               style={styles.row}
@@ -136,21 +184,50 @@ const styles = StyleSheet.create({
   },
   errorText: {
     fontFamily: FONTS.body,
+    fontSize: 16,
     color: COLORS.danger,
     textAlign: "center",
+  },
+  tabScroll: {
+    flexGrow: 0,
+    backgroundColor: COLORS.background,
+  },
+  tabRow: {
+    flexDirection: "row",
+    gap: SPACING.xl,
+    paddingHorizontal: SPACING.xl,
+    paddingTop: SPACING.lg,
+    paddingBottom: SPACING.md,
+  },
+  tabButton: {
+    paddingBottom: SPACING.sm,
+  },
+  tabText: {
+    fontFamily: FONTS.bodySemiBold,
+    fontSize: 16,
+    color: COLORS.textMuted,
+  },
+  tabTextActive: {
+    color: COLORS.text,
+  },
+  tabUnderline: {
+    marginTop: SPACING.xs,
+    height: 2,
+    backgroundColor: COLORS.primary,
+    borderRadius: 1,
   },
   list: {
     paddingBottom: 24,
     backgroundColor: COLORS.background,
   },
   sectionHeader: {
-    backgroundColor: COLORS.surface,
-    paddingHorizontal: SPACING.lg,
-    paddingVertical: SPACING.sm,
-    fontFamily: FONTS.bodySemiBold,
-    fontSize: 13,
-    color: COLORS.primary,
-    textTransform: "uppercase",
+    fontFamily: FONTS.heading,
+    fontSize: 20,
+    color: COLORS.text,
+    backgroundColor: COLORS.background,
+    paddingHorizontal: SPACING.xl,
+    paddingTop: SPACING.lg,
+    paddingBottom: SPACING.md,
   },
   row: {
     flexDirection: "row",
@@ -188,7 +265,7 @@ const styles = StyleSheet.create({
   },
   playerNumber: {
     fontFamily: FONTS.body,
-    fontSize: 13,
+    fontSize: 16,
     color: COLORS.textMuted,
   },
 });

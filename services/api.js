@@ -285,3 +285,19 @@ export async function voteForMom(matchId, playerId, userId) {
 
   return data;
 }
+
+// ==========================================
+// STANDINGS
+// ==========================================
+
+export async function getStandings() {
+  const response = await fetch(`${API_URL}/standings`);
+
+  const data = await response.json();
+
+  if (!response.ok) {
+    throw new Error(data.message || "Stand ophalen mislukt.");
+  }
+
+  return data;
+}

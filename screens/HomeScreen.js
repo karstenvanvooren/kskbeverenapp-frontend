@@ -14,32 +14,27 @@ import {
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 import MatchListCard from "../components/MatchListCard";
+import NewsListCard from "../components/NewsListCard";
 import { COLORS, FONTS, RADII, SPACING } from "../constants/theme";
-import { getMatches, getNews, getPlayers } from "../services/api";
+import { getMatches, getNews, getPlayers, getStandings } from "../services/api";
 
 const logo = require("../assets/images/logo.png");
 const leeuwHeader = require("../assets/images/leeuw_header.png");
 
-// TODO: no standings/ranking endpoint exists yet on the backend — this is a
-// placeholder until there's a real source for league position.
-const LEAGUE_POSITION = "3de";
+const OWN_TEAM_NAME = "KSK Beveren";
+
+function formatOrdinal(position) {
+  if (position === 1 || position === 8) {
+    return `${position}ste`;
+  }
+  return `${position}de`;
+}
 
 function formatDayTime(dateValue, time) {
   const day = new Date(dateValue).toLocaleDateString("nl-BE", {
     weekday: "long",
   });
   return `${day.charAt(0).toUpperCase()}${day.slice(1)}, ${time}`;
-}
-
-function timeAgo(value) {
-  const diffMs = Date.now() - new Date(value).getTime();
-  const diffHours = Math.floor(diffMs / (1000 * 60 * 60));
-
-  if (diffHours < 1) return "Zojuist";
-  if (diffHours < 24) return `${diffHours} uur geleden`;
-
-  const diffDays = Math.floor(diffHours / 24);
-  return `${diffDays} ${diffDays === 1 ? "dag" : "dagen"} geleden`;
 }
 
 function initials(name) {
@@ -51,21 +46,32 @@ export default function HomeScreen({ navigation }) {
   const [matches, setMatches] = useState([]);
   const [players, setPlayers] = useState([]);
   const [latestNews, setLatestNews] = useState([]);
+  const [leaguePosition, setLeaguePosition] = useState("-");
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
   const [error, setError] = useState("");
 
   const loadHome = useCallback(async () => {
     try {
-      const [matchesData, playersData, newsData] = await Promise.all([
-        getMatches(),
-        getPlayers(),
-        getNews(),
-      ]);
+      const [matchesData, playersData, newsData, standingsData] =
+        await Promise.all([
+          getMatches(),
+          getPlayers(),
+          getNews(),
+          getStandings(),
+        ]);
 
       setMatches(matchesData);
       setPlayers(playersData);
       setLatestNews(newsData.slice(0, 3));
+
+      const ownStanding = standingsData.find(
+        (team) => team.team === OWN_TEAM_NAME
+      );
+      setLeaguePosition(
+        ownStanding ? formatOrdinal(ownStanding.position) : "-"
+      );
+
       setError("");
     } catch (loadError) {
       setError(loadError.message);
@@ -164,7 +170,7 @@ export default function HomeScreen({ navigation }) {
       </View>
 
       <View style={styles.statsRow}>
-        <StatTile icon="trending-up" label="Positie" value={LEAGUE_POSITION} />
+        <StatTile icon="trending-up" label="Positie" value={leaguePosition} />
         <StatTile
           icon="calendar-outline"
           label="Wedstrijden"
@@ -199,28 +205,13 @@ export default function HomeScreen({ navigation }) {
         <Text style={styles.emptyText}>Geen nieuwsartikels gevonden.</Text>
       ) : (
         latestNews.map((article) => (
-          <Pressable
+          <NewsListCard
             key={article._id}
-            style={styles.newsCard}
+            article={article}
             onPress={() =>
               navigation.navigate("NewsDetail", { newsId: article._id })
             }
-          >
-            {article.image ? (
-              <Image
-                source={{ uri: article.image }}
-                style={styles.newsImage}
-              />
-            ) : (
-              <View style={styles.newsImagePlaceholder} />
-            )}
-            <View style={styles.newsBody}>
-              <Text style={styles.newsTitle} numberOfLines={2}>
-                {article.title}
-              </Text>
-              <Text style={styles.newsTime}>{timeAgo(article.publishedAt)}</Text>
-            </View>
-          </Pressable>
+          />
         ))
       )}
     </ScrollView>
@@ -398,39 +389,5 @@ const styles = StyleSheet.create({
     fontSize: 16,
     color: COLORS.textMuted,
     paddingHorizontal: SPACING.xl,
-  },
-  newsCard: {
-    flexDirection: "row",
-    backgroundColor: COLORS.surface,
-    borderRadius: RADII.md,
-    marginHorizontal: SPACING.xl,
-    marginBottom: SPACING.sm,
-    overflow: "hidden",
-  },
-  newsImage: {
-    width: 72,
-    height: 72,
-    backgroundColor: COLORS.border,
-  },
-  newsImagePlaceholder: {
-    width: 72,
-    height: 72,
-    backgroundColor: COLORS.border,
-  },
-  newsBody: {
-    flex: 1,
-    padding: SPACING.md,
-    justifyContent: "center",
-  },
-  newsTitle: {
-    fontFamily: FONTS.bodySemiBold,
-    fontSize: 18,
-    color: COLORS.text,
-  },
-  newsTime: {
-    fontFamily: FONTS.body,
-    fontSize: 16,
-    color: COLORS.textMuted,
-    marginTop: 4,
   },
 });

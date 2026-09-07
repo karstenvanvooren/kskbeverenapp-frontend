@@ -1,16 +1,17 @@
 import { useState } from "react";
 import {
-    ActivityIndicator,
-    KeyboardAvoidingView,
-    Platform,
-    Pressable,
-    ScrollView,
-    StyleSheet,
-    Text,
-    TextInput,
-    View,
+  ActivityIndicator,
+  KeyboardAvoidingView,
+  Platform,
+  Pressable,
+  ScrollView,
+  StyleSheet,
+  Text,
+  TextInput,
+  View,
 } from "react-native";
 
+import ModalHeader from "../components/ModalHeader";
 import { COLORS, FONTS, RADII, SPACING } from "../constants/theme";
 import { useAuth } from "../context/AuthContext";
 
@@ -54,87 +55,91 @@ export default function RegisterScreen({ navigation }) {
   }
 
   return (
-    <KeyboardAvoidingView
-      style={styles.flex}
-      behavior={Platform.OS === "ios" ? "padding" : undefined}
-    >
-      <ScrollView contentContainerStyle={styles.container}>
-        <Text style={styles.title}>Account aanmaken</Text>
-        <Text style={styles.subtitle}>
-          Maak een account aan om deel te nemen aan de community van KSK
-          Beveren.
-        </Text>
-
-        <View style={styles.field}>
-          <Text style={styles.label}>Gebruikersnaam</Text>
-          <TextInput
-            style={styles.input}
-            value={username}
-            onChangeText={setUsername}
-            autoCapitalize="none"
-            placeholder="jouwnaam"
-          />
-        </View>
-
-        <View style={styles.field}>
-          <Text style={styles.label}>Email</Text>
-          <TextInput
-            style={styles.input}
-            value={email}
-            onChangeText={setEmail}
-            autoCapitalize="none"
-            autoComplete="email"
-            keyboardType="email-address"
-            placeholder="naam@voorbeeld.be"
-          />
-        </View>
-
-        <View style={styles.field}>
-          <Text style={styles.label}>Wachtwoord</Text>
-          <TextInput
-            style={styles.input}
-            value={password}
-            onChangeText={setPassword}
-            secureTextEntry
-            placeholder="••••••••"
-          />
-        </View>
-
-        <View style={styles.field}>
-          <Text style={styles.label}>Bevestig wachtwoord</Text>
-          <TextInput
-            style={styles.input}
-            value={confirmPassword}
-            onChangeText={setConfirmPassword}
-            secureTextEntry
-            placeholder="••••••••"
-          />
-        </View>
-
-        {error ? <Text style={styles.error}>{error}</Text> : null}
-
-        <Pressable
-          style={[styles.button, submitting && styles.buttonDisabled]}
-          onPress={handleRegister}
-          disabled={submitting}
-        >
-          {submitting ? (
-            <ActivityIndicator color={COLORS.white} />
-          ) : (
-            <Text style={styles.buttonText}>Registreren</Text>
-          )}
-        </Pressable>
-
-        <Pressable
-          style={styles.linkRow}
-          onPress={() => navigation.navigate("Login")}
-        >
-          <Text style={styles.linkText}>
-            Heb je al een account? <Text style={styles.linkBold}>Log in</Text>
+    <View style={styles.flex}>
+      <ModalHeader title="Account aanmaken" />
+      <KeyboardAvoidingView
+        style={styles.flex}
+        behavior={Platform.OS === "ios" ? "padding" : undefined}
+      >
+        <ScrollView contentContainerStyle={styles.container}>
+          <Text style={styles.title}>Account aanmaken</Text>
+          <Text style={styles.subtitle}>
+            Maak een account aan om deel te nemen aan de community van KSK
+            Beveren.
           </Text>
-        </Pressable>
-      </ScrollView>
-    </KeyboardAvoidingView>
+
+          <View style={styles.field}>
+            <Text style={styles.label}>Gebruikersnaam</Text>
+            <TextInput
+              style={styles.input}
+              value={username}
+              onChangeText={setUsername}
+              autoCapitalize="none"
+              placeholder="jouwnaam"
+            />
+          </View>
+
+          <View style={styles.field}>
+            <Text style={styles.label}>Email</Text>
+            <TextInput
+              style={styles.input}
+              value={email}
+              onChangeText={setEmail}
+              autoCapitalize="none"
+              autoComplete="email"
+              keyboardType="email-address"
+              placeholder="naam@voorbeeld.be"
+            />
+          </View>
+
+          <View style={styles.field}>
+            <Text style={styles.label}>Wachtwoord</Text>
+            <TextInput
+              style={styles.input}
+              value={password}
+              onChangeText={setPassword}
+              secureTextEntry
+              placeholder="••••••••"
+            />
+          </View>
+
+          <View style={styles.field}>
+            <Text style={styles.label}>Bevestig wachtwoord</Text>
+            <TextInput
+              style={styles.input}
+              value={confirmPassword}
+              onChangeText={setConfirmPassword}
+              secureTextEntry
+              placeholder="••••••••"
+            />
+          </View>
+
+          {error ? <Text style={styles.error}>{error}</Text> : null}
+
+          <Pressable
+            style={[styles.button, submitting && styles.buttonDisabled]}
+            onPress={handleRegister}
+            disabled={submitting}
+          >
+            {submitting ? (
+              <ActivityIndicator color={COLORS.white} />
+            ) : (
+              <Text style={styles.buttonText}>Registreren</Text>
+            )}
+          </Pressable>
+
+          <Pressable
+            style={styles.linkRow}
+            onPress={() => navigation.navigate("Login")}
+          >
+            <Text style={styles.linkText}>
+              Heb je al een account?{" "}
+              <Text style={styles.linkBold}>Log in</Text>
+            </Text>
+          </Pressable>
+        </ScrollView>
+      </KeyboardAvoidingView>
+    </View>
   );
 }
 
@@ -156,7 +161,7 @@ const styles = StyleSheet.create({
   },
   subtitle: {
     fontFamily: FONTS.body,
-    fontSize: 14,
+    fontSize: 16,
     color: COLORS.textMuted,
     marginBottom: SPACING.xxl,
   },
@@ -165,7 +170,7 @@ const styles = StyleSheet.create({
   },
   label: {
     fontFamily: FONTS.bodySemiBold,
-    fontSize: 13,
+    fontSize: 16,
     color: COLORS.text,
     marginBottom: SPACING.sm - 2,
   },
@@ -181,6 +186,7 @@ const styles = StyleSheet.create({
   },
   error: {
     fontFamily: FONTS.body,
+    fontSize: 16,
     color: COLORS.danger,
     marginBottom: SPACING.md,
   },
@@ -205,6 +211,7 @@ const styles = StyleSheet.create({
   },
   linkText: {
     fontFamily: FONTS.body,
+    fontSize: 16,
     color: COLORS.textMuted,
   },
   linkBold: {
