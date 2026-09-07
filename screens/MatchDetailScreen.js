@@ -1,15 +1,16 @@
 import { useEffect, useState } from "react";
 import {
-    ActivityIndicator,
-    Image,
-    Pressable,
-    ScrollView,
-    StyleSheet,
-    Text,
-    View,
+  ActivityIndicator,
+  Image,
+  Pressable,
+  ScrollView,
+  StyleSheet,
+  Text,
+  View,
 } from "react-native";
 
 import ModalHeader from "../components/ModalHeader";
+import { OWN_TEAM_LOGO, resolveClubLogo } from "../constants/localImages";
 import { COLORS, FONTS, RADII, SPACING } from "../constants/theme";
 import { getMatch } from "../services/api";
 
@@ -84,6 +85,9 @@ export default function MatchDetailScreen({ route, navigation }) {
   const awayTeam = match.home ? match.opponent : "KSK Beveren";
   const homeScore = match.home ? match.homeScore : match.awayScore;
   const awayScore = match.home ? match.awayScore : match.homeScore;
+  const opponentLogo = resolveClubLogo(match.opponentLogo);
+  const homeLogo = match.home ? OWN_TEAM_LOGO : opponentLogo;
+  const awayLogo = match.home ? opponentLogo : OWN_TEAM_LOGO;
 
   return (
     <View style={styles.screen}>
@@ -95,10 +99,11 @@ export default function MatchDetailScreen({ route, navigation }) {
 
         <View style={styles.matchupBox}>
           <View style={styles.teamColumn}>
-            {match.home ? null : match.opponentLogo ? (
+            {homeLogo ? (
               <Image
-                source={{ uri: match.opponentLogo }}
+                source={homeLogo}
                 style={styles.crest}
+                resizeMode="contain"
               />
             ) : null}
             <Text style={styles.teamName}>{homeTeam}</Text>
@@ -113,10 +118,11 @@ export default function MatchDetailScreen({ route, navigation }) {
           )}
 
           <View style={styles.teamColumn}>
-            {match.home && match.opponentLogo ? (
+            {awayLogo ? (
               <Image
-                source={{ uri: match.opponentLogo }}
+                source={awayLogo}
                 style={styles.crest}
+                resizeMode="contain"
               />
             ) : null}
             <Text style={styles.teamName}>{awayTeam}</Text>

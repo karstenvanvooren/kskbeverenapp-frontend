@@ -1,5 +1,6 @@
-import { Pressable, StyleSheet, Text, View } from "react-native";
+import { Image, Pressable, StyleSheet, Text, View } from "react-native";
 
+import { OWN_TEAM_LOGO, resolveClubLogo } from "../constants/localImages";
 import { COLORS, FONTS, RADII, SPACING } from "../constants/theme";
 
 function initials(name) {
@@ -13,10 +14,35 @@ function formatShortDate(value) {
   });
 }
 
+// Shows the club crest when one is available, falling back to the old
+// initials-in-a-circle look for any club that doesn't have a logo yet.
+function TeamBadge({ logo, fallbackLabel }) {
+  if (logo) {
+    return (
+      <View style={styles.chipLogo}>
+        <Image
+          source={logo}
+          style={styles.chipLogoImage}
+          resizeMode="contain"
+        />
+      </View>
+    );
+  }
+
+  return (
+    <View style={styles.chip}>
+      <Text style={styles.chipText}>{fallbackLabel}</Text>
+    </View>
+  );
+}
+
 export default function MatchListCard({ match, onPress }) {
   const isFinished = match.status === "finished";
-  const homeTeam = match.home ? "KSK" : initials(match.opponent);
-  const awayTeam = match.home ? initials(match.opponent) : "KSK";
+  const opponentLogo = resolveClubLogo(match.opponentLogo);
+  const homeLogo = match.home ? OWN_TEAM_LOGO : opponentLogo;
+  const awayLogo = match.home ? opponentLogo : OWN_TEAM_LOGO;
+  const homeLabel = match.home ? "KSK" : initials(match.opponent);
+  const awayLabel = match.home ? initials(match.opponent) : "KSK";
 
   return (
     <Pressable style={styles.card} onPress={onPress}>
@@ -32,9 +58,7 @@ export default function MatchListCard({ match, onPress }) {
       </View>
 
       <View style={styles.teams}>
-        <View style={styles.chip}>
-          <Text style={styles.chipText}>{homeTeam}</Text>
-        </View>
+        <TeamBadge logo={homeLogo} fallbackLabel={homeLabel} />
 
         {isFinished ? (
           <Text style={styles.score}>
@@ -44,9 +68,7 @@ export default function MatchListCard({ match, onPress }) {
           <Text style={styles.vs}>vs</Text>
         )}
 
-        <View style={styles.chip}>
-          <Text style={styles.chipText}>{awayTeam}</Text>
-        </View>
+        <TeamBadge logo={awayLogo} fallbackLabel={awayLabel} />
       </View>
     </Pressable>
   );
@@ -107,6 +129,21 @@ const styles = StyleSheet.create({
     fontFamily: FONTS.bodySemiBold,
     fontSize: 16,
     color: COLORS.white,
+  },
+  chipLogo: {
+    width: 46,
+    height: 46,
+    borderRadius: 23,
+    backgroundColor: COLORS.white,
+    borderWidth: 1,
+    borderColor: COLORS.border,
+    alignItems: "center",
+    justifyContent: "center",
+    padding: 5,
+  },
+  chipLogoImage: {
+    width: "100%",
+    height: "100%",
   },
   vs: {
     fontFamily: FONTS.body,

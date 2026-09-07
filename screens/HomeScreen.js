@@ -15,6 +15,7 @@ import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 import MatchListCard from "../components/MatchListCard";
 import NewsListCard from "../components/NewsListCard";
+import { OWN_TEAM_LOGO, resolveClubLogo } from "../constants/localImages";
 import { COLORS, FONTS, RADII, SPACING } from "../constants/theme";
 import { getMatches, getNews, getPlayers, getStandings } from "../services/api";
 
@@ -153,17 +154,23 @@ export default function HomeScreen({ navigation }) {
             </View>
 
             <View style={styles.matchup}>
-              <View style={styles.teamCircle}>
-                <Text style={styles.teamCircleText}>
-                  {nextMatch.home ? "KSK" : initials(nextMatch.opponent)}
-                </Text>
-              </View>
+              <TeamCircle
+                logo={
+                  nextMatch.home
+                    ? OWN_TEAM_LOGO
+                    : resolveClubLogo(nextMatch.opponentLogo)
+                }
+                label={nextMatch.home ? "KSK" : initials(nextMatch.opponent)}
+              />
               <Text style={styles.vs}>vs</Text>
-              <View style={styles.teamCircle}>
-                <Text style={styles.teamCircleText}>
-                  {nextMatch.home ? initials(nextMatch.opponent) : "KSK"}
-                </Text>
-              </View>
+              <TeamCircle
+                logo={
+                  nextMatch.home
+                    ? resolveClubLogo(nextMatch.opponentLogo)
+                    : OWN_TEAM_LOGO
+                }
+                label={nextMatch.home ? initials(nextMatch.opponent) : "KSK"}
+              />
             </View>
           </Pressable>
         ) : null}
@@ -215,6 +222,28 @@ export default function HomeScreen({ navigation }) {
         ))
       )}
     </ScrollView>
+  );
+}
+
+// Shows the club crest in the hero "next match" card when one is
+// available, falling back to the translucent initials circle otherwise.
+function TeamCircle({ logo, label }) {
+  if (logo) {
+    return (
+      <View style={styles.teamCircleLogo}>
+        <Image
+          source={logo}
+          style={styles.teamCircleLogoImage}
+          resizeMode="contain"
+        />
+      </View>
+    );
+  }
+
+  return (
+    <View style={styles.teamCircle}>
+      <Text style={styles.teamCircleText}>{label}</Text>
+    </View>
   );
 }
 
@@ -326,6 +355,19 @@ const styles = StyleSheet.create({
     fontFamily: FONTS.bodySemiBold,
     fontSize: 16,
     color: COLORS.white,
+  },
+  teamCircleLogo: {
+    width: 56,
+    height: 56,
+    borderRadius: 28,
+    backgroundColor: COLORS.white,
+    alignItems: "center",
+    justifyContent: "center",
+    padding: 6,
+  },
+  teamCircleLogoImage: {
+    width: "100%",
+    height: "100%",
   },
   vs: {
     fontFamily: FONTS.body,

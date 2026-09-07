@@ -24,7 +24,7 @@ export default function NewsListCard({ article, onPress }) {
           <Image
             source={imageSource}
             style={StyleSheet.absoluteFill}
-            resizeMode="cover"
+            resizeMode="contain"
           />
         ) : null}
       </View>
