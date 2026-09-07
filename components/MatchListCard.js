@@ -24,8 +24,10 @@ export default function MatchListCard({ match, onPress }) {
         <Text style={styles.date}>
           {formatShortDate(match.date)} • {match.time}
         </Text>
-        <View style={styles.tag}>
-          <Text style={styles.tagText}>{match.home ? "Thuis" : "Uit"}</Text>
+        <View style={[styles.tag, !match.home && styles.tagAway]}>
+          <Text style={[styles.tagText, !match.home && styles.tagTextAway]}>
+            {match.home ? "Thuis" : "Uit"}
+          </Text>
         </View>
       </View>
 
@@ -77,29 +79,34 @@ const styles = StyleSheet.create({
     paddingHorizontal: 12,
     paddingVertical: 4,
   },
+  tagAway: {
+    backgroundColor: "#E4E9F9",
+  },
   tagText: {
     fontFamily: FONTS.bodySemiBold,
     fontSize: 16,
     color: COLORS.accentDark,
   },
+  tagTextAway: {
+    color: COLORS.primary,
+  },
   teams: {
     flexDirection: "row",
     alignItems: "center",
-    justifyContent: "center",
-    gap: SPACING.md,
+    justifyContent: "space-between",
   },
   chip: {
     width: 46,
     height: 46,
     borderRadius: 23,
-    backgroundColor: COLORS.surface,
+    backgroundColor: COLORS.primary,
     alignItems: "center",
     justifyContent: "center",
   },
   chipText: {
     fontFamily: FONTS.bodySemiBold,
     fontSize: 16,
-    color: COLORS.primary,
+    color: COLORS.white,
   },
   vs: {
     fontFamily: FONTS.body,

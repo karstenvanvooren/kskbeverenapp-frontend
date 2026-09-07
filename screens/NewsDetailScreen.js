@@ -44,7 +44,7 @@ function formatCommentDate(value) {
 
 export default function NewsDetailScreen({ route, navigation }) {
   const { newsId } = route.params;
-  const { user, isAuthenticated } = useAuth();
+  const { user, isAuthenticated, logout } = useAuth();
   const insets = useSafeAreaInsets();
 
   const [article, setArticle] = useState(null);
@@ -80,7 +80,13 @@ export default function NewsDetailScreen({ route, navigation }) {
   async function handleAddComment() {
     if (!commentText.trim()) return;
 
+    if (!user?.id) {
+      setError("Je bent niet correct ingelogd. Log opnieuw in en probeer het nogmaals.");
+      return;
+    }
+
     setPosting(true);
+    setError("");
 
     try {
       await addComment(newsId, user.id, commentText.trim());
@@ -88,7 +94,16 @@ export default function NewsDetailScreen({ route, navigation }) {
       const refreshed = await getComments(newsId);
       setComments(refreshed);
     } catch (postError) {
-      setError(postError.message);
+      // A stale saved login (e.g. the backend's users were reseeded after
+      // you logged in) points at a userId that no longer exists. Force a
+      // clean logout so the login screen comes back instead of failing
+      // forever with a confusing backend error.
+      if (postError.message?.toLowerCase().includes("gebruiker niet gevonden")) {
+        await logout();
+        setError("Je sessie was verlopen. Log opnieuw in en probeer het nogmaals.");
+      } else {
+        setError(postError.message);
+      }
     } finally {
       setPosting(false);
     }
@@ -188,6 +203,10 @@ export default function NewsDetailScreen({ route, navigation }) {
         }
         ListFooterComponent={<View style={{ height: 24 }} />}
       />
+
+      {isAuthenticated && error ? (
+        <Text style={styles.postError}>{error}</Text>
+      ) : null}
 
       {isAuthenticated ? (
         <View
@@ -301,6 +320,15 @@ const styles = StyleSheet.create({
     textAlign: "center",
     color: COLORS.textMuted,
     paddingVertical: SPACING.lg,
+  },
+  postError: {
+    fontFamily: FONTS.body,
+    fontSize: 13,
+    color: COLORS.danger,
+    textAlign: "center",
+    paddingHorizontal: SPACING.xl,
+    paddingTop: SPACING.sm,
+    backgroundColor: COLORS.background,
   },
   comment: {
     paddingHorizontal: SPACING.xl,

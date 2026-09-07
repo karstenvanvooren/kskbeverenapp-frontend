@@ -19,11 +19,15 @@ export default function NewsListCard({ article, onPress }) {
 
   return (
     <Pressable style={styles.card} onPress={onPress}>
-      {imageSource ? (
-        <Image source={imageSource} style={styles.image} />
-      ) : (
-        <View style={styles.imagePlaceholder} />
-      )}
+      <View style={styles.imageWrap}>
+        {imageSource ? (
+          <Image
+            source={imageSource}
+            style={StyleSheet.absoluteFill}
+            resizeMode="cover"
+          />
+        ) : null}
+      </View>
 
       <View style={styles.body}>
         <Text style={styles.category}>{article.category}</Text>
@@ -46,22 +50,16 @@ export default function NewsListCard({ article, onPress }) {
 const styles = StyleSheet.create({
   card: {
     flexDirection: "row",
-    alignItems: "flex-start",
     backgroundColor: COLORS.surface,
     borderRadius: RADII.lg,
     marginHorizontal: SPACING.xl,
     marginBottom: SPACING.lg,
     overflow: "hidden",
   },
-  image: {
+  imageWrap: {
     width: 92,
-    height: 92,
     backgroundColor: COLORS.border,
-  },
-  imagePlaceholder: {
-    width: 92,
-    height: 92,
-    backgroundColor: COLORS.border,
+    overflow: "hidden",
   },
   body: {
     flex: 1,

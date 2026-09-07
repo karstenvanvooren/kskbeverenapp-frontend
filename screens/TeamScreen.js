@@ -107,9 +107,12 @@ export default function TeamScreen({ navigation }) {
             >
               {filter.label}
             </Text>
-            {activeFilter === filter.key ? (
-              <View style={styles.tabUnderline} />
-            ) : null}
+            <View
+              style={[
+                styles.tabUnderline,
+                activeFilter !== filter.key && styles.tabUnderlineHidden,
+              ]}
+            />
           </Pressable>
         ))}
       </ScrollView>
@@ -211,6 +214,9 @@ const styles = StyleSheet.create({
     height: 2,
     backgroundColor: COLORS.primary,
     borderRadius: 1,
+  },
+  tabUnderlineHidden: {
+    backgroundColor: "transparent",
   },
   list: {
     paddingBottom: 24,

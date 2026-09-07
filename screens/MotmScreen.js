@@ -1,27 +1,27 @@
 import { useFocusEffect } from "@react-navigation/native";
 import { useCallback, useState } from "react";
 import {
-    ActivityIndicator,
-    FlatList,
-    Pressable,
-    StyleSheet,
-    Text,
-    View,
+  ActivityIndicator,
+  FlatList,
+  Pressable,
+  StyleSheet,
+  Text,
+  View,
 } from "react-native";
 
 import { COLORS, FONTS, RADII, SPACING } from "../constants/theme";
 import { useAuth } from "../context/AuthContext";
 import {
-    getMatch,
-    getMomResults,
-    getMomVotes,
-    getPlayers,
-    voteForMom,
+  getMatch,
+  getMomResults,
+  getMomVotes,
+  getPlayers,
+  voteForMom,
 } from "../services/api";
 
 export default function MotmScreen({ route, navigation }) {
   const { matchId } = route.params;
-  const { user, isAuthenticated } = useAuth();
+  const { user, isAuthenticated, logout } = useAuth();
 
   const [match, setMatch] = useState(null);
   const [players, setPlayers] = useState([]);
@@ -81,9 +81,18 @@ export default function MotmScreen({ route, navigation }) {
       const refreshedResults = await getMomResults(matchId);
       setResults(refreshedResults);
     } catch (voteError) {
-      setNotice(voteError.message);
-      if (voteError.message?.toLowerCase().includes("al gestemd")) {
-        setHasVoted(true);
+      // A stale saved login (e.g. the backend's users were reseeded after
+      // you logged in) points at a userId that no longer exists. Force a
+      // clean logout so the login screen comes back instead of failing
+      // forever with a confusing backend error.
+      if (voteError.message?.toLowerCase().includes("gebruiker niet gevonden")) {
+        await logout();
+        setNotice("Je sessie was verlopen. Log opnieuw in en probeer het nogmaals.");
+      } else {
+        setNotice(voteError.message);
+        if (voteError.message?.toLowerCase().includes("al gestemd")) {
+          setHasVoted(true);
+        }
       }
     } finally {
       setVoting(false);

@@ -1,45 +1,26 @@
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { useEffect, useState } from "react";
 import {
-  ActivityIndicator,
-  FlatList,
-  Modal,
   Pressable,
   ScrollView,
   StyleSheet,
   Switch,
   Text,
-  TextInput,
   View,
 } from "react-native";
 
 import ModalHeader from "../components/ModalHeader";
 import { COLORS, FONTS, RADII, SPACING } from "../constants/theme";
 import { useAuth } from "../context/AuthContext";
-import { getPlayers } from "../services/api";
 
 const NOTIFICATIONS_KEY = "ksk_notifications_enabled";
 
 export default function ProfileScreen() {
-  const { user, logout, updateProfile } = useAuth();
+  const { user, logout } = useAuth();
 
-  const [username, setUsername] = useState(user?.username ?? "");
-  const [players, setPlayers] = useState([]);
-  const [pickerVisible, setPickerVisible] = useState(false);
-  const [saving, setSaving] = useState(false);
-  const [message, setMessage] = useState("");
-  const [error, setError] = useState("");
   const [notificationsEnabled, setNotificationsEnabled] = useState(true);
   const [matchNotifications, setMatchNotifications] = useState(true);
   const [newsNotifications, setNewsNotifications] = useState(true);
-
-  useEffect(() => {
-    getPlayers()
-      .then(setPlayers)
-      .catch(() => {
-        // Favoriete-spelerkeuze is optioneel, negeer stil bij een netwerkfout.
-      });
-  }, []);
 
   useEffect(() => {
     AsyncStorage.getItem(NOTIFICATIONS_KEY)
@@ -90,43 +71,6 @@ export default function ProfileScreen() {
     });
   }
 
-  const favoritePlayer = players.find(
-    (player) => player._id === user?.favoritePlayerId
-  );
-
-  async function handleSaveUsername() {
-    if (!username.trim() || username.trim() === user.username) return;
-
-    setSaving(true);
-    setError("");
-    setMessage("");
-
-    try {
-      await updateProfile({ username: username.trim() });
-      setMessage("Gebruikersnaam bijgewerkt.");
-    } catch (saveError) {
-      setError(saveError.message);
-    } finally {
-      setSaving(false);
-    }
-  }
-
-  async function handlePickFavorite(playerId) {
-    setPickerVisible(false);
-    setSaving(true);
-    setError("");
-    setMessage("");
-
-    try {
-      await updateProfile({ favoritePlayerId: playerId });
-      setMessage("Favoriete speler bijgewerkt.");
-    } catch (saveError) {
-      setError(saveError.message);
-    } finally {
-      setSaving(false);
-    }
-  }
-
   return (
     <View style={styles.screen}>
       <ModalHeader title="Profiel" />
@@ -137,45 +81,8 @@ export default function ProfileScreen() {
           </Text>
         </View>
 
+        <Text style={styles.username}>{user.username}</Text>
         <Text style={styles.email}>{user.email}</Text>
-
-        <View style={styles.field}>
-          <Text style={styles.label}>Gebruikersnaam</Text>
-          <View style={styles.usernameRow}>
-            <TextInput
-              style={styles.input}
-              value={username}
-              onChangeText={setUsername}
-              autoCapitalize="none"
-            />
-            <Pressable
-              style={styles.saveButton}
-              onPress={handleSaveUsername}
-              disabled={saving}
-            >
-              <Text style={styles.saveButtonText}>Opslaan</Text>
-            </Pressable>
-          </View>
-        </View>
-
-        <View style={styles.field}>
-          <Text style={styles.label}>Favoriete speler</Text>
-          <Pressable
-            style={styles.favoriteRow}
-            onPress={() => setPickerVisible(true)}
-          >
-            <Text style={styles.favoriteName}>
-              {favoritePlayer
-                ? `${favoritePlayer.firstName} ${favoritePlayer.lastName}`
-                : "Kies een favoriete speler"}
-            </Text>
-            <Text style={styles.favoriteChange}>Wijzigen</Text>
-          </Pressable>
-        </View>
-
-        {saving ? <ActivityIndicator color={COLORS.primary} /> : null}
-        {message ? <Text style={styles.success}>{message}</Text> : null}
-        {error ? <Text style={styles.error}>{error}</Text> : null}
 
         <View style={styles.settingsSection}>
           <Text style={styles.sectionTitle}>Meldingen</Text>
@@ -243,33 +150,6 @@ export default function ProfileScreen() {
           <Text style={styles.logoutButtonText}>Uitloggen</Text>
         </Pressable>
       </ScrollView>
-
-      <Modal visible={pickerVisible} animationType="slide">
-        <View style={styles.modalContainer}>
-          <Text style={styles.modalTitle}>Kies je favoriete speler</Text>
-          <FlatList
-            data={players}
-            keyExtractor={(item) => item._id}
-            renderItem={({ item }) => (
-              <Pressable
-                style={styles.modalRow}
-                onPress={() => handlePickFavorite(item._id)}
-              >
-                <Text style={styles.modalRowText}>
-                  {item.firstName} {item.lastName}
-                </Text>
-                <Text style={styles.modalRowMeta}>{item.position}</Text>
-              </Pressable>
-            )}
-          />
-          <Pressable
-            style={styles.modalClose}
-            onPress={() => setPickerVisible(false)}
-          >
-            <Text style={styles.modalCloseText}>Sluiten</Text>
-          </Pressable>
-        </View>
-      </Modal>
     </View>
   );
 }
@@ -300,75 +180,17 @@ const styles = StyleSheet.create({
     color: COLORS.white,
     fontSize: 32,
   },
+  username: {
+    fontFamily: FONTS.heading,
+    fontSize: 18,
+    color: COLORS.text,
+    marginBottom: 2,
+  },
   email: {
     fontFamily: FONTS.body,
     fontSize: 16,
     color: COLORS.textMuted,
     marginBottom: SPACING.xxl,
-  },
-  field: {
-    width: "100%",
-    marginBottom: SPACING.xl,
-  },
-  label: {
-    fontFamily: FONTS.bodySemiBold,
-    fontSize: 16,
-    color: COLORS.text,
-    marginBottom: SPACING.sm,
-  },
-  usernameRow: {
-    flexDirection: "row",
-    gap: SPACING.sm,
-  },
-  input: {
-    flex: 1,
-    fontFamily: FONTS.body,
-    borderWidth: 1,
-    borderColor: COLORS.border,
-    borderRadius: RADII.sm,
-    paddingHorizontal: SPACING.md + 2,
-    paddingVertical: SPACING.sm + 2,
-    fontSize: 16,
-  },
-  saveButton: {
-    backgroundColor: COLORS.primary,
-    borderRadius: RADII.sm,
-    paddingHorizontal: SPACING.lg,
-    justifyContent: "center",
-  },
-  saveButtonText: {
-    fontFamily: FONTS.button,
-    color: COLORS.white,
-  },
-  favoriteRow: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    alignItems: "center",
-    backgroundColor: COLORS.surface,
-    borderRadius: RADII.sm,
-    padding: SPACING.md + 2,
-  },
-  favoriteName: {
-    fontFamily: FONTS.bodySemiBold,
-    fontSize: 16,
-    color: COLORS.text,
-  },
-  favoriteChange: {
-    fontFamily: FONTS.bodySemiBold,
-    color: COLORS.primary,
-    fontSize: 16,
-  },
-  success: {
-    fontFamily: FONTS.body,
-    fontSize: 16,
-    color: COLORS.success,
-    marginBottom: SPACING.sm,
-  },
-  error: {
-    fontFamily: FONTS.body,
-    fontSize: 16,
-    color: COLORS.danger,
-    marginBottom: SPACING.sm,
   },
   settingsSection: {
     width: "100%",
@@ -431,42 +253,5 @@ const styles = StyleSheet.create({
     fontFamily: FONTS.button,
     color: COLORS.danger,
     fontSize: 16,
-  },
-  modalContainer: {
-    flex: 1,
-    paddingTop: 60,
-    paddingHorizontal: SPACING.xl,
-    backgroundColor: COLORS.background,
-  },
-  modalTitle: {
-    fontFamily: FONTS.heading,
-    fontSize: 18,
-    marginBottom: SPACING.lg,
-    color: COLORS.text,
-  },
-  modalRow: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    paddingVertical: SPACING.md + 2,
-    borderBottomWidth: StyleSheet.hairlineWidth,
-    borderBottomColor: COLORS.border,
-  },
-  modalRowText: {
-    fontFamily: FONTS.bodySemiBold,
-    fontSize: 16,
-    color: COLORS.text,
-  },
-  modalRowMeta: {
-    fontFamily: FONTS.body,
-    fontSize: 16,
-    color: COLORS.textMuted,
-  },
-  modalClose: {
-    paddingVertical: SPACING.lg,
-    alignItems: "center",
-  },
-  modalCloseText: {
-    fontFamily: FONTS.button,
-    color: COLORS.primary,
   },
 });
