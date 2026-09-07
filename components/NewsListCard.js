@@ -1,4 +1,5 @@
 import { Image, Pressable, StyleSheet, Text, View } from "react-native";
+import { resolveNewsImage } from "../constants/localImages";
 import { COLORS, FONTS, RADII, SPACING } from "../constants/theme";
 
 // Shared row-style news card: small thumbnail on the left, category/title/
@@ -14,10 +15,12 @@ function formatDate(value) {
 }
 
 export default function NewsListCard({ article, onPress }) {
+  const imageSource = resolveNewsImage(article.image);
+
   return (
     <Pressable style={styles.card} onPress={onPress}>
-      {article.image ? (
-        <Image source={{ uri: article.image }} style={styles.image} />
+      {imageSource ? (
+        <Image source={imageSource} style={styles.image} />
       ) : (
         <View style={styles.imagePlaceholder} />
       )}

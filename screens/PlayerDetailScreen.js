@@ -1,14 +1,15 @@
 import { useEffect, useState } from "react";
 import {
-    ActivityIndicator,
-    Image,
-    ScrollView,
-    StyleSheet,
-    Text,
-    View,
+  ActivityIndicator,
+  Image,
+  ScrollView,
+  StyleSheet,
+  Text,
+  View,
 } from "react-native";
 
 import ModalHeader from "../components/ModalHeader";
+import { resolvePlayerImage } from "../constants/localImages";
 import { COLORS, FONTS, RADII, SPACING } from "../constants/theme";
 import { getPlayer } from "../services/api";
 
@@ -81,15 +82,10 @@ export default function PlayerDetailScreen({ route }) {
       <ModalHeader title="Speler" />
       <ScrollView contentContainerStyle={styles.container}>
         <View style={styles.header}>
-          {player.image ? (
-            <Image source={{ uri: player.image }} style={styles.avatar} />
-          ) : (
-            <View style={styles.avatarFallback}>
-              <Text style={styles.avatarFallbackText}>
-                {player.number ?? "?"}
-              </Text>
-            </View>
-          )}
+          <Image
+            source={resolvePlayerImage(player.image)}
+            style={styles.avatar}
+          />
 
           <Text style={styles.name}>
             {player.firstName} {player.lastName}
@@ -151,20 +147,7 @@ const styles = StyleSheet.create({
     borderRadius: 50,
     backgroundColor: COLORS.border,
     marginBottom: SPACING.md,
-  },
-  avatarFallback: {
-    width: 100,
-    height: 100,
-    borderRadius: 50,
-    backgroundColor: COLORS.primary,
-    alignItems: "center",
-    justifyContent: "center",
-    marginBottom: SPACING.md,
-  },
-  avatarFallbackText: {
-    fontFamily: FONTS.display,
-    color: COLORS.white,
-    fontSize: 32,
+    resizeMode: "cover",
   },
   name: {
     fontFamily: FONTS.display,

@@ -1,5 +1,5 @@
-import { Ionicons } from "@expo/vector-icons";
 import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
+import { Image } from "react-native";
 
 import { COLORS, FONTS } from "../constants/theme";
 import HomeStack from "./HomeStack";
@@ -10,10 +10,10 @@ import TeamStack from "./TeamStack";
 const Tab = createBottomTabNavigator();
 
 const ICONS = {
-  Home: "home",
-  Matches: "football",
-  News: "newspaper",
-  Team: "people",
+  Home: require("../assets/images/icon_home.png"),
+  Matches: require("../assets/images/icon_calander.png"),
+  News: require("../assets/images/icon_news.png"),
+  Team: require("../assets/images/icon_team.png"),
 };
 
 export default function MainTabs() {
@@ -31,8 +31,16 @@ export default function MainTabs() {
           fontFamily: FONTS.bodySemiBold,
           fontSize: 11,
         },
-        tabBarIcon: ({ color, size }) => (
-          <Ionicons name={ICONS[route.name]} size={size} color={color} />
+        tabBarIcon: ({ focused, size }) => (
+          <Image
+            source={ICONS[route.name]}
+            style={{
+              width: size,
+              height: size,
+              opacity: focused ? 1 : 0.6,
+            }}
+            resizeMode="contain"
+          />
         ),
       })}
     >

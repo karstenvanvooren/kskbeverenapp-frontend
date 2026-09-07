@@ -1,27 +1,28 @@
 import { useFocusEffect } from "@react-navigation/native";
 import { useCallback, useState } from "react";
 import {
-    ActivityIndicator,
-    FlatList,
-    Image,
-    KeyboardAvoidingView,
-    Platform,
-    Pressable,
-    StyleSheet,
-    Text,
-    TextInput,
-    View,
+  ActivityIndicator,
+  FlatList,
+  Image,
+  KeyboardAvoidingView,
+  Platform,
+  Pressable,
+  StyleSheet,
+  Text,
+  TextInput,
+  View,
 } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 import ModalHeader from "../components/ModalHeader";
+import { resolveNewsImage } from "../constants/localImages";
 import { COLORS, FONTS, RADII, SPACING } from "../constants/theme";
 import { useAuth } from "../context/AuthContext";
 import {
-    addComment,
-    deleteComment,
-    getComments,
-    getNewsArticle,
+  addComment,
+  deleteComment,
+  getComments,
+  getNewsArticle,
 } from "../services/api";
 
 function formatDate(value) {
@@ -138,8 +139,11 @@ export default function NewsDetailScreen({ route, navigation }) {
         keyExtractor={(item) => item._id}
         ListHeaderComponent={
           <View>
-            {article.image ? (
-              <Image source={{ uri: article.image }} style={styles.image} />
+            {resolveNewsImage(article.image) ? (
+              <Image
+                source={resolveNewsImage(article.image)}
+                style={styles.image}
+              />
             ) : null}
 
             <View style={styles.body}>

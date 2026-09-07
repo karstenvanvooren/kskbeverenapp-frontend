@@ -14,6 +14,7 @@ import {
 
 import NewsListCard from "../components/NewsListCard";
 import ScreenHeader from "../components/ScreenHeader";
+import { resolveNewsImage } from "../constants/localImages";
 import { COLORS, FONTS, RADII, SPACING } from "../constants/theme";
 import { getComments, getNews } from "../services/api";
 
@@ -152,9 +153,9 @@ export default function NewsScreen({ navigation }) {
                     }
                   >
                     <View style={styles.featuredImageWrap}>
-                      {item.image ? (
+                      {resolveNewsImage(item.image) ? (
                         <Image
-                          source={{ uri: item.image }}
+                          source={resolveNewsImage(item.image)}
                           style={styles.featuredImage}
                         />
                       ) : (

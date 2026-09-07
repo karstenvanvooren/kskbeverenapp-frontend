@@ -12,6 +12,7 @@ import {
 } from "react-native";
 
 import ScreenHeader from "../components/ScreenHeader";
+import { resolvePlayerImage } from "../constants/localImages";
 import { COLORS, FONTS, SPACING } from "../constants/theme";
 import { getPlayers } from "../services/api";
 
@@ -139,15 +140,10 @@ export default function TeamScreen({ navigation }) {
                 navigation.navigate("PlayerDetail", { playerId: item._id })
               }
             >
-              {item.image ? (
-                <Image source={{ uri: item.image }} style={styles.avatar} />
-              ) : (
-                <View style={styles.avatarFallback}>
-                  <Text style={styles.avatarFallbackText}>
-                    {item.number ?? "?"}
-                  </Text>
-                </View>
-              )}
+              <Image
+                source={resolvePlayerImage(item.image)}
+                style={styles.avatar}
+              />
 
               <View style={styles.rowText}>
                 <Text style={styles.playerName}>
@@ -242,18 +238,7 @@ const styles = StyleSheet.create({
     height: 44,
     borderRadius: 22,
     backgroundColor: COLORS.border,
-  },
-  avatarFallback: {
-    width: 44,
-    height: 44,
-    borderRadius: 22,
-    backgroundColor: COLORS.primary,
-    alignItems: "center",
-    justifyContent: "center",
-  },
-  avatarFallbackText: {
-    fontFamily: FONTS.bodySemiBold,
-    color: COLORS.white,
+    resizeMode: "cover",
   },
   rowText: {
     marginLeft: SPACING.md,
