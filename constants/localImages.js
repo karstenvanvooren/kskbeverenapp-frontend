@@ -1,7 +1,4 @@
-// Local bundled player/news/club photos, keyed by whatever string is stored
-// in the backend's `image` / `opponentLogo` field. Metro (the RN bundler)
-// needs every require(...) call to be static, so each local asset has to be
-// listed literally here rather than built dynamically from a variable.
+
 
 export const PLAYER_IMAGES = {
   jarl: require("../assets/images/jarl.jpg"),
@@ -40,10 +37,6 @@ export const NEWS_IMAGES = {
   crowdfunding: require("../assets/images/crowdfunding.jpg"),
 };
 
-// Opponent club crests, keyed the same way (one entry per club that shows
-// up as `opponent` in seedMatches.js). "kskbeveren" isn't in here because
-// it's not looked up dynamically -- it's exported directly below since
-// it's always our own team's crest, never a value coming from the backend.
 export const CLUB_LOGOS = {
   skbeveren: require("../assets/images/skbeveren.png"),
   latem: require("../assets/images/latem.jpeg"),
@@ -66,16 +59,10 @@ export const CLUB_LOGOS = {
   kruishoutem: require("../assets/images/kruishoutem.png"),
 };
 
-// KSK Beveren's own crest -- used for "our side" of a matchup everywhere a
-// team badge is shown, instead of looking it up by key like an opponent.
 export const OWN_TEAM_LOGO = require("../assets/images/logo.png");
 
 const FALLBACK_PLAYER_IMAGE = PLAYER_IMAGES.fil_geenfoto;
 
-// `image` on a Player/News document (or `opponentLogo` on a Match) can be
-// either a real http(s) URL (if you switch to hosted photos later, e.g. via
-// imgbb) or one of the local keys above. These resolve either case to
-// something <Image source={...}> can use directly.
 export function resolvePlayerImage(imageValue) {
   if (!imageValue) return FALLBACK_PLAYER_IMAGE;
   if (imageValue.startsWith("http")) return { uri: imageValue };

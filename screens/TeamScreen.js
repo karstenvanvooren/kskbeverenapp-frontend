@@ -219,7 +219,7 @@ const styles = StyleSheet.create({
     backgroundColor: "transparent",
   },
   list: {
-    paddingBottom: 24,
+    paddingBottom: 120,
     backgroundColor: COLORS.background,
   },
   sectionHeader: {

@@ -250,8 +250,10 @@ const styles = StyleSheet.create({
     borderColor: COLORS.danger,
   },
   logoutButtonText: {
-    fontFamily: FONTS.button,
+    fontFamily: FONTS.heading,
     color: COLORS.danger,
     fontSize: 16,
+    textTransform: "uppercase",
+    letterSpacing: 0.5,
   },
 });

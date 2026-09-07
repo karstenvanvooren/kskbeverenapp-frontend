@@ -250,7 +250,7 @@ const styles = StyleSheet.create({
     textAlign: "center",
   },
   list: {
-    paddingBottom: SPACING.xl,
+    paddingBottom: 120,
     backgroundColor: COLORS.background,
   },
   sectionTitle: {

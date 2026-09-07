@@ -7,11 +7,6 @@ import RegisterScreen from "../screens/RegisterScreen";
 
 const Stack = createNativeStackNavigator();
 
-// Standard React Navigation "auth flow" pattern: which screens exist in this
-// stack depends on login state, so logging in/out automatically swaps them.
-// Every screen renders its own ModalHeader (blue background, yellow title,
-// X close button) instead of the native stack header, matching MatchDetail/
-// NewsDetail/PlayerDetail.
 export default function ProfileStack() {
   const { isAuthenticated } = useAuth();
 

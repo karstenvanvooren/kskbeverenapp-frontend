@@ -289,7 +289,7 @@ const styles = StyleSheet.create({
     textAlign: "center",
   },
   container: {
-    paddingBottom: 40,
+    paddingBottom: 120,
   },
   hero: {
     backgroundColor: COLORS.primary,
@@ -344,9 +344,9 @@ const styles = StyleSheet.create({
     justifyContent: "space-between",
   },
   teamCircle: {
-    width: 56,
-    height: 56,
-    borderRadius: 28,
+    width: 64,
+    height: 64,
+    borderRadius: 32,
     backgroundColor: "rgba(255,255,255,0.14)",
     alignItems: "center",
     justifyContent: "center",
@@ -357,13 +357,14 @@ const styles = StyleSheet.create({
     color: COLORS.white,
   },
   teamCircleLogo: {
-    width: 56,
-    height: 56,
-    borderRadius: 28,
+    width: 64,
+    height: 64,
+    borderRadius: 32,
     backgroundColor: COLORS.white,
     alignItems: "center",
     justifyContent: "center",
-    padding: 6,
+    padding: 7,
+    overflow: "hidden",
   },
   teamCircleLogoImage: {
     width: "100%",
@@ -404,7 +405,7 @@ const styles = StyleSheet.create({
   },
   statLabel: {
     fontFamily: FONTS.body,
-    fontSize: 16,
+    fontSize: 15,
     color: "#DCE4F7",
     textAlign: "center",
   },

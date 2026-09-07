@@ -1,11 +1,8 @@
 import { Image, Pressable, StyleSheet, Text, View } from "react-native";
+
 import { resolveNewsImage } from "../constants/localImages";
 import { COLORS, FONTS, RADII, SPACING } from "../constants/theme";
 
-// Shared row-style news card: small thumbnail on the left, category/title/
-// summary/date on the right. Used by both NewsScreen's "Recente nieuws"
-// list and HomeScreen's "Het laatste nieuws" section so the two stay
-// visually identical.
 function formatDate(value) {
   return new Date(value).toLocaleDateString("nl-BE", {
     day: "numeric",
@@ -21,11 +18,7 @@ export default function NewsListCard({ article, onPress }) {
     <Pressable style={styles.card} onPress={onPress}>
       <View style={styles.imageWrap}>
         {imageSource ? (
-          <Image
-            source={imageSource}
-            style={StyleSheet.absoluteFill}
-            resizeMode="contain"
-          />
+          <Image source={imageSource} style={styles.image} resizeMode="cover" />
         ) : null}
       </View>
 
@@ -50,6 +43,7 @@ export default function NewsListCard({ article, onPress }) {
 const styles = StyleSheet.create({
   card: {
     flexDirection: "row",
+    alignItems: "center",
     backgroundColor: COLORS.surface,
     borderRadius: RADII.lg,
     marginHorizontal: SPACING.xl,
@@ -57,9 +51,14 @@ const styles = StyleSheet.create({
     overflow: "hidden",
   },
   imageWrap: {
-    width: 92,
+    width: 120,
+    height: 160,
     backgroundColor: COLORS.border,
     overflow: "hidden",
+  },
+  image: {
+    width: "100%",
+    height: "100%",
   },
   body: {
     flex: 1,

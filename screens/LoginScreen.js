@@ -167,9 +167,11 @@ const styles = StyleSheet.create({
     opacity: 0.6,
   },
   buttonText: {
-    fontFamily: FONTS.button,
+    fontFamily: FONTS.heading,
     color: COLORS.white,
     fontSize: 16,
+    textTransform: "uppercase",
+    letterSpacing: 0.5,
   },
   linkRow: {
     marginTop: SPACING.xl,

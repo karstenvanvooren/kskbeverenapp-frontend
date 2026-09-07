@@ -10,12 +10,6 @@ import StartStack from "./StartStack";
 
 const Stack = createNativeStackNavigator();
 
-// First launch (or after logout) shows the branded Start screen. From there
-// you can log in, register, or continue as a guest — either way you land on
-// MainTabs. Profile no longer lives in the bottom tab bar; it's a modal
-// pushed from the top-right icon on the main screens, reachable from
-// anywhere via navigation.navigate("Profile") (React Navigation bubbles
-// that call up to this root stack automatically).
 export default function RootNavigator() {
   const { isLoading, canBrowse } = useAuth();
 

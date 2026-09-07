@@ -160,7 +160,7 @@ const styles = StyleSheet.create({
   },
   list: {
     paddingTop: SPACING.sm,
-    paddingBottom: 24,
+    paddingBottom: 120,
   },
   emptyText: {
     fontFamily: FONTS.body,

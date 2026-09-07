@@ -11,8 +11,7 @@ export function AuthProvider({ children }) {
   const [user, setUser] = useState(null);
   const [token, setToken] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
-  // Lets someone past the Start screen without an account. Resets on logout
-  // and on a fresh app start, so Start is shown again next time.
+
   const [isGuest, setIsGuest] = useState(false);
 
   // Restore a saved session when the app starts.
@@ -59,7 +58,7 @@ export function AuthProvider({ children }) {
 
   async function register(username, email, password) {
     await registerUser(username, email, password);
-    // De backend geeft geen token bij registreren, dus meteen inloggen.
+    
     return login(email, password);
   }
 

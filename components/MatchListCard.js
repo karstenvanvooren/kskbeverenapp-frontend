@@ -14,8 +14,6 @@ function formatShortDate(value) {
   });
 }
 
-// Shows the club crest when one is available, falling back to the old
-// initials-in-a-circle look for any club that doesn't have a logo yet.
 function TeamBadge({ logo, fallbackLabel }) {
   if (logo) {
     return (
@@ -140,6 +138,7 @@ const styles = StyleSheet.create({
     alignItems: "center",
     justifyContent: "center",
     padding: 5,
+    overflow: "hidden",
   },
   chipLogoImage: {
     width: "100%",

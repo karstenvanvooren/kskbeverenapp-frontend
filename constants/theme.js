@@ -1,5 +1,4 @@
-// KSK Beveren brand theme — colors and fonts from the club style guide.
-// Swap COLORS.crest / add a logo asset once the real crest file is available.
+
 
 export const COLORS = {
   yellow: "#F3D02D",
@@ -9,14 +8,14 @@ export const COLORS = {
   white: "#FFFFFF",
   black: "#000000",
 
-  // Semantic aliases used throughout the app
-  primary: "#2743B2", // blue — headers, tab bar, primary actions
+  
+  primary: "#2743B2", 
   primaryDark: "#1F3693",
-  accent: "#F3D02D", // yellow — high-emphasis CTAs, highlights
+  accent: "#F3D02D", 
   accentDark: "#B59C23",
 
   background: "#FFFFFF",
-  surface: "#F5F7FB", // light card/section background
+  surface: "#F5F7FB", 
   border: "#E7EAF2",
 
   text: "#111111",
